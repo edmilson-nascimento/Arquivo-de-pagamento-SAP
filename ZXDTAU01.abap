@@ -4,115 +4,89 @@
 
 DATA: concessionarias TYPE REF TO zcl_fi_pgto_concessionarias,
       fornecedores    TYPE REF TO zcl_fi_pgto_fornecedores,
-* I - 16/08/2017 - 8568
-*      reguh           TYPE zcl_fi_pgto_concessionarias=>ty_reguh,
-*      error           TYPE flag,
+      reguh           TYPE zcl_fi_pgto_concessionarias=>ty_reguh,
+      error           TYPE flag,
       lt_arquivo      TYPE TABLE OF bu_txt10000,
-      lv_meio_pag     TYPE char2.
+      meio_pagamento  TYPE char2.
 
 CONSTANTS: c_concessionarias TYPE char2 VALUE 'CO',
            c_fornecedor      TYPE char2 VALUE 'FO'.
-* F - 16/08/2017 - 8568
 
 CREATE OBJECT concessionarias.
 CREATE OBJECT fornecedores.
 
+concessionarias->get_data(
+  exporting
+    regut = t_regut
+  importing
+    reguh = reguh
+    error = error
+).
 
-* I - 16/08/2017 - 8568
-* Modificações para executar na mesma proposta arquivos de concessinários e fornecedor
-* Verificar qual meio de pagamento pertence o arquivo.
+if error eq abap_false .
 
-*concessionarias->get_data(
-*  exporting
-*    regut = t_regut
-*  importing
-*    reguh = reguh
-*    error = error
-*).
-*
-*if error eq abap_false .
-*
-*  concessionarias->change_file(
-*    exporting
-*      i_filename = i_filename
-*      reguh      = reguh
-*  ).
-*
-*endif .
-*
-*fornecedores->get_data(
-*  exporting
-*    regut = t_regut
-*  importing
-*    error = error
-*).
-*
-*if error eq abap_false .
-*
-*  fornecedores->change_file(
-*    exporting
-*      i_filename = i_filename
-*      reguh      = reguh
-*  ).
-*
-*endif .
+  concessionarias->change_file(
+    exporting
+      i_filename = i_filename
+      reguh      = reguh
+  ).
+
+endif .
+
+fornecedores->get_data(
+  exporting
+    regut = t_regut
+  importing
+    error = error
+).
+
+if error eq abap_false .
+
+  fornecedores->change_file(
+    exporting
+      i_filename = i_filename
+      reguh      = reguh
+  ).
+
+endif .
 
 concessionarias->get_data(
-  EXPORTING
+  exporting
     regut   = t_regut
  ).
 
 concessionarias->check_file(
-  EXPORTING
+  exporting
     i_filename  = i_filename
-   IMPORTING
+   importing
     t_arquivo        = lt_arquivo
-    e_meio_pagamento = lv_meio_pag
+    e_meio_pagamento = meio_pagamento
   ).
 
-CASE lv_meio_pag.
+case meio_pagamento .
 
-  WHEN c_concessionarias.
+  when c_concessionarias.
 
     concessionarias->change_file(
-      EXPORTING
+      exporting
         i_filename = i_filename
         t_file     = lt_arquivo
     ).
 
-  WHEN c_fornecedor.
+  when c_fornecedor.
 
     fornecedores->get_data(
-      EXPORTING
+      exporting
         regut = t_regut
     ).
 
     fornecedores->change_file(
-      EXPORTING
+      exporting
         i_filename = i_filename
         t_file     = lt_arquivo
     ).
 
-ENDCASE.
+endcase.
 
-FREE: concessionarias, fornecedores.
-
-*--------------------------------------------------------------
-* Seidor Véritas
-* Data: 29/01/2018
-* Autor: Lucas Amorino Mendes
-* Chamado: 9981
-* Atividade: Processo de envio de arquivo bancário para Neogid
-*---------------------------------------------------------------
-
-DATA lo_envio TYPE REF TO zcl_envio_arqui_banc_neogrid.
-
-CREATE OBJECT lo_envio
-  EXPORTING
-    i_regut = t_regut.
-
-lo_envio->process_sending_file( ).
-
-FREE lo_envio.
-
-*---------------------------------------------------------------
+free: 
+  concessionarias, fornecedores.
