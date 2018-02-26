@@ -2,18 +2,20 @@
 *&  Include           ZXDTAU01
 *&---------------------------------------------------------------------
 
-DATA: concessionarias TYPE REF TO zcl_fi_pgto_concessionarias,
-      fornecedores    TYPE REF TO zcl_fi_pgto_fornecedores,
-      reguh           TYPE zcl_fi_pgto_concessionarias=>ty_reguh,
-      error           TYPE flag,
-      lt_arquivo      TYPE TABLE OF bu_txt10000,
-      meio_pagamento  TYPE char2.
+data: 
+  concessionarias type ref to zcl_fi_pgto_concessionarias,
+  fornecedores    type ref to zcl_fi_pgto_fornecedores,
+  reguh           type zcl_fi_pgto_concessionarias=>ty_reguh,
+  error           type flag,
+  lt_arquivo      type table of bu_txt10000,
+  meio_pagamento  type char2.
 
-CONSTANTS: c_concessionarias TYPE char2 VALUE 'CO',
-           c_fornecedor      TYPE char2 VALUE 'FO'.
+constants: 
+  c_concessionarias type char2 value 'CO',
+  c_fornecedor      type char2 value 'FO'.
 
-CREATE OBJECT concessionarias.
-CREATE OBJECT fornecedores.
+create object concessionarias.
+create object fornecedores.
 
 concessionarias->get_data(
   exporting
