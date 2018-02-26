@@ -2,25 +2,20 @@
 *&  Include           ZXDTAU01
 &---------------------------------------------------------------------
 
-DATA: concessionarias TYPE REF TO zcl_fi_pgto_concessionarias,
-      fornecedores    TYPE REF TO zcl_fi_pgto_fornecedores,
-* I - 16/08/2017 - 8568
-*      reguh           TYPE zcl_fi_pgto_concessionarias=>ty_reguh,
-*      error           TYPE flag,
-      lt_arquivo      TYPE TABLE OF bu_txt10000,
-      lv_meio_pag     TYPE char2.
+DATA: 
+  concessionarias TYPE REF TO zcl_fi_pgto_concessionarias,
+  fornecedores    TYPE REF TO zcl_fi_pgto_fornecedores,
+* reguh           TYPE zcl_fi_pgto_concessionarias=>ty_reguh,
+* error           TYPE flag,
+  lt_arquivo      TYPE TABLE OF bu_txt10000,
+  lv_meio_pag     TYPE char2.
 
-CONSTANTS: c_concessionarias TYPE char2 VALUE 'CO',
-           c_fornecedor      TYPE char2 VALUE 'FO'.
-* F - 16/08/2017 - 8568
+CONSTANTS: 
+  c_concessionarias TYPE char2 VALUE 'CO',
+  c_fornecedor      TYPE char2 VALUE 'FO'.
 
 CREATE OBJECT concessionarias.
 CREATE OBJECT fornecedores.
-
-
-* I - 16/08/2017 - 8568
-* Modificações para executar na mesma proposta arquivos de concessinários e fornecedor
-* Verificar qual meio de pagamento pertence o arquivo.
 
 *concessionarias->get_data(
 *  exporting
@@ -95,15 +90,8 @@ CASE lv_meio_pag.
 
 ENDCASE.
 
-FREE: concessionarias, fornecedores.
-
-*--------------------------------------------------------------
-* Seidor Véritas
-* Data: 29/01/2018
-* Autor: Lucas Amorino Mendes
-* Chamado: 9981
-* Atividade: Processo de envio de arquivo bancário para Neogid
-*---------------------------------------------------------------
+FREE: 
+  concessionarias, fornecedores.
 
 DATA lo_envio TYPE REF TO zcl_envio_arqui_banc_neogrid.
 
@@ -114,5 +102,3 @@ CREATE OBJECT lo_envio
 lo_envio->process_sending_file( ).
 
 FREE lo_envio.
-
-*---------------------------------------------------------------
