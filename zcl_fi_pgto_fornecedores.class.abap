@@ -1,12 +1,12 @@
-class ZCL_FI_PGTO_FORNECEDORES definition
+class zcl_fi_pgto_fornecedores definition
   public
   final
   create public .
 
-public section.
+  public section.
 
-  types:
-    begin of ty_reguh,
+    types:
+      begin of ty_reguh,
         laufd type reguh-laufd,
         laufi type reguh-laufi,
         xvorl type reguh-xvorl,
@@ -18,12 +18,12 @@ public section.
         name1 type reguh-name1,
         rzawe type reguh-rzawe,
         rbetr type reguh-rbetr,
-        AUGDT type reguh-AUGDT, "SVT - ACPM - 26.06.2017
-        AUSFD type reguh-AUSFD, "SVT - ACPM - 26.06.2017
-        RWBTR type reguh-RWBTR, "SVT - ACPM - 06.07.2017
-      end of ty_reguh .
-  types:
-    begin of ty_regup,
+        augdt type reguh-augdt,
+        ausfd type reguh-ausfd,
+        rwbtr type reguh-rwbtr,
+      end of ty_reguh,
+
+      begin of ty_regup,
         laufd type regup-laufd,
         laufi type regup-laufi,
         xvorl type regup-xvorl,
@@ -40,9 +40,9 @@ public section.
         zbd1t type regup-zbd1t,
         esrnr type regup-esrnr,
         esrre type regup-esrre,
-      end of ty_regup .
-  types:
-    begin of ty_bseg,
+      end of ty_regup,
+
+      begin of ty_bseg,
         bukrs type bseg-bukrs,
         belnr type bseg-belnr,
         gjahr type bseg-gjahr,
@@ -52,52 +52,49 @@ public section.
         lifnr type bseg-lifnr,
         zfbdt type bseg-zfbdt,
         zbd1t type bseg-zbd1t,
-      end of ty_bseg .
-  types:
-    begin of ty_dfkkbptaxnum,
+      end of ty_bseg,
+
+      begin of ty_dfkkbptaxnum,
         partner type dfkkbptaxnum-partner,
         taxtype type dfkkbptaxnum-partner,
-      end of ty_dfkkbptaxnum .
-  types:
-    begin of ty_but0bk,
+      end of ty_dfkkbptaxnum,
+
+      begin of ty_but0bk,
         partner type but0bk-partner,
         bkvid   type but0bk-bkvid,
         banks   type but0bk-banks,
         bankl   type but0bk-bankl,
         bankn   type but0bk-bankn,
-      end of ty_but0bk .
-  types:
-    tab_regup        type table of ty_regup .
-  types:
-    tab_reguh        type table of ty_reguh .
-  types:
-    tab_bseg         type table of ty_bseg .
-  types:
-    tab_dfkkbptaxnum type table of ty_dfkkbptaxnum .
-  types:
-    tab_but0bk       type table of ty_but0bk .
-  types TY_DETALHE type BU_TXT10000 .
-  types:
-    tab_arquivo      type table of bu_txt10000 .
-  types:
-    tab_detalhe      type table of ty_detalhe .
-  types TY_ARQUIVO type BU_TXT10000 .
+      end of ty_but0bk,
 
-  class-methods GET_BANK_104
-    exporting
-      !BANCO type CHAR3
-      !AGENCIA type CHAR4
-      !CONTA type CHAR8
-      !DIGITO_AGENCIA type CHAR1
-      !DIGITO_CONTA type CHAR1 .
-  methods GET_DATA
-    importing
-      !REGUT type REGUT .
-  methods CHANGE_FILE
-    importing
-      !I_FILENAME type RLGRAP-FILENAME
-      !T_FILE type TAB_ARQUIVO .
-  protected section.
+      ty_detalhe       type bu_txt10000,
+      ty_arquivo       type bu_txt10000,
+      tab_regup        type table of ty_regup,
+      tab_reguh        type table of ty_reguh,
+      tab_bseg         type table of ty_bseg,
+      tab_dfkkbptaxnum type table of ty_dfkkbptaxnum,
+      tab_but0bk       type table of ty_but0bk,
+      tab_arquivo      type table of bu_txt10000,
+      tab_detalhe      type table of ty_detalhe .
+    
+    class-methods get_bank_104
+      exporting
+        !banco          type char3
+        !agencia        type char4
+        !conta          type char8
+        !digito_agencia type char1
+        !digito_conta   type char1 .
+
+    methods get_data
+      importing
+        !regut type regut .
+
+    methods change_file
+      importing
+        !i_filename type rlgrap-filename
+        !t_file     type tab_arquivo .
+
+  protected section .
 
     methods space
       importing
@@ -105,98 +102,103 @@ public section.
         !end   type i default 0
       changing
         !line  type any .
-private section.
 
-  constants:
-    c_santander    type c length 3 value '033' ##NO_TEXT.
-  constants:
-    c_caixa        type c length 3 value '104' ##NO_TEXT.
-  constants:
-    c_itau         type c length 3 value '341' ##NO_TEXT.
-  constants:
-    c_banco_brasil type c length 3 value '001' ##NO_TEXT.
-  data T_REGUH type TAB_REGUH .
-  data T_REGUP type TAB_REGUP .
-  data T_BSEG type TAB_BSEG .
-  data T_DFKKBPTAXNUM type TAB_DFKKBPTAXNUM .
-  data T_BUT0BK type TAB_BUT0BK .
+  private section.
 
-  methods CHECK_CENARIO
-    importing
-      !INICIO type CHAR1000SF
-    changing
-      !ERROR type FLAG .
-  methods GET_INFO_FILE
-    importing
-      !ARQUIVO type TAB_ARQUIVO
-    exporting
-      !INICIO type CHAR1000SF
-      !CABECALHO type BU_TXT10000
-      !T_DETALHE type TAB_DETALHE
-      !RODAPE type CHAR1000SF
-      !FIM type CHAR1000SF
-      !FILENAME type STRING .
-  methods CHANGE_INICIO
-    changing
-      !INICIO type CHAR1000SF .
-  methods CHANGE_CABECALHO
-    changing
-      !CABECALHO type BU_TXT10000 .
-  methods CHANGE_INFO_DETALHES
-    changing
-      !T_DETALHE type TAB_DETALHE .
-  methods CHANGE_INFO_DETALHES_104
-    changing
-      !DETALHE type TY_DETALHE .
-  methods CHANGE_INFO_DETALHES_001
-    changing
-      !DETALHE type TY_DETALHE .
-  methods CHANGE_INFO_RODAPE
-    changing
-      !RODAPE type CHAR1000SF .
-  methods CHANGE_INFO_FIM
-    changing
-      !FIM type CHAR1000SF .
-  methods SET_INFO_FILE
-    importing
-      !INICIO type CHAR1000SF
-      !CABECALHO type BU_TXT10000
-      !T_DETALHE type TAB_DETALHE
-      !RODAPE type CHAR1000SF
-      !FIM type CHAR1000SF
-    changing
-      !T_ARQUIVO type TAB_ARQUIVO .
-  methods GET_PF_PJ
-    importing
-      !DETALHE type TY_DETALHE
-    returning
-      value(VALUE) type CHAR3 .
-  methods GET_BANK_CLIENT
-    importing
-      !DETALHE type TY_DETALHE
-    exporting
-      !BANCO type CHAR3
-      !AGENCIA type CHAR4
-      !CONTA type CHAR8 .
-  methods GET_DETAIL
-    importing
-      !DETALHE type TY_DETALHE
-    exporting
-      !REGUH type TY_REGUH
-      !REGUP type TY_REGUP
-      !BSEG type TY_BSEG .
-ENDCLASS.
+    constants:
+      c_santander    type c length 3 value '033',
+      c_caixa        type c length 3 value '104',
+      c_itau         type c length 3 value '341',
+      c_banco_brasil type c length 3 value '001' .
 
+    data:
+      t_reguh        type tab_reguh,
+      t_regup        type tab_regup,
+      t_bseg         type tab_bseg,
+      t_dfkkbptaxnum type tab_dfkkbptaxnum,
+      t_but0bk       type tab_but0bk .
 
+    methods check_cenario
+      importing
+        !inicio type char1000sf
+      changing
+        !error  type flag .
 
-CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
+    methods get_info_file
+      importing
+        !arquivo   type tab_arquivo
+      exporting
+        !inicio    type char1000sf
+        !cabecalho type bu_txt10000
+        !t_detalhe type tab_detalhe
+        !rodape    type char1000sf
+        !fim       type char1000sf
+        !filename  type string .
 
+    methods change_inicio
+      changing
+        !inicio type char1000sf .
 
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->CHANGE_CABECALHO
-* +-------------------------------------------------------------------------------------------------+
-* | [<-->] CABECALHO                      TYPE        BU_TXT10000
-* +--------------------------------------------------------------------------------------</SIGNATURE>
+    methods change_cabecalho
+      changing
+        !cabecalho type bu_txt10000 .
+
+    methods change_info_detalhes
+      changing
+        !t_detalhe type tab_detalhe .
+
+    methods change_info_detalhes_104
+      changing
+        !detalhe type ty_detalhe .
+
+    methods change_info_detalhes_001
+      changing
+        !detalhe type ty_detalhe .
+
+    methods change_info_rodape
+      changing
+        !rodape type char1000sf .
+
+    methods change_info_fim
+      changing
+        !fim type char1000sf .
+
+    methods set_info_file
+      importing
+        !inicio    type char1000sf
+        !cabecalho type bu_txt10000
+        !t_detalhe type tab_detalhe
+        !rodape    type char1000sf
+        !fim       type char1000sf
+      changing
+        !t_arquivo type tab_arquivo .
+
+    methods get_pf_pj
+      importing
+        !detalhe     type ty_detalhe
+      returning
+        value(value) type char3 .
+
+    methods get_bank_client
+      importing
+        !detalhe type ty_detalhe
+      exporting
+        !banco   type char3
+        !agencia type char4
+        !conta   type char8 .
+
+    methods get_detail
+      importing
+        !detalhe type ty_detalhe
+      exporting
+        !reguh   type ty_reguh
+        !regup   type ty_regup
+        !bseg    type ty_bseg .
+        
+endclass.
+
+class zcl_fi_pgto_fornecedores implementation.
+
   method change_cabecalho.
 
     if cabecalho is not initial .
@@ -213,9 +215,9 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 *         1.20    72  72  X(001)  Dígito da Agência/Conta
           me->get_bank_104(
             importing
-*              banco          =
-*              agencia        =
-*              conta          =
+*             banco          =
+*             agencia        =
+*             conta          =
               digito_agencia = cabecalho+71(1)
               digito_conta   = cabecalho+70(1)
           ).
@@ -227,7 +229,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
             changing
               line  = cabecalho
           ).
-
 
 *         Versão do leiaute do lote
 *         cabecalho+13(3) = '045' .
@@ -242,9 +243,8 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
               line  = cabecalho
           ).
 
-
 *         Número da conta
-*         Pos 59 a 70 – Número da conta: Preencher conforme detalhamento do item 0.16, página 2 do layout (anexo).
+*         Pos 59 a 70 – Número da conta: Preencher conforme detalhamento do item 0.16
           cabecalho+58(4) = '0003' .
 
 *         1.30 223 230 X(008) Uso exclusivo FEBRABAN
@@ -265,7 +265,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
               line  = cabecalho
           ).
 
-
         when c_banco_brasil .
 
           cabecalho+9(2) = '98' .
@@ -283,7 +282,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
         when others .
 
-
       endcase.
 
     endif .
@@ -291,13 +289,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_FI_PGTO_FORNECEDORES->CHANGE_FILE
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] I_FILENAME                     TYPE        RLGRAP-FILENAME
-* | [--->] T_FILE                         TYPE        TAB_ARQUIVO
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method change_file.
 
     data:
@@ -318,24 +309,8 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
     refresh:
       t_cabecalho, t_detalhe, t_arquivo .
 
-* I - 16/08/2017 - CH8568
-*    if reguh-rzawe eq 'F'  .
-*      exit .
-*    endif .
-*
-*    filename = i_filename.
-*
-*    call function 'GUI_UPLOAD'
-*      exporting
-*        filename = filename
-*        filetype = 'ASC'
-*      tables
-*        data_tab = t_arquivo.
-
-    filename    = i_filename.
-    t_arquivo[] = t_file[].
-
-* F - 16/08/2017 - CH8568
+    filename = i_filename.
+    append lines of t_file to t_arquivo . 
 
     if lines( t_arquivo ) eq 0 .
     else .
@@ -409,12 +384,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->CHANGE_INFO_DETALHES
-* +-------------------------------------------------------------------------------------------------+
-* | [<-->] T_DETALHE                      TYPE        TAB_DETALHE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method change_info_detalhes .
 
     loop at t_detalhe into data(detalhe) .
@@ -436,270 +405,7 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
         when others .
 
-
       endcase.
-
-
-*      case detalhe+13(1) .
-*
-*        when 'A' .
-*
-*          read table t_reguh into data(reguh)
-*            with key vblnr = detalhe+73(10)
-*            binary search.
-*
-**         Temporario / Verificando outra posição
-*          if sy-subrc eq 0 .
-*          else .
-*
-*            read table t_reguh into reguh
-*              with key vblnr = detalhe+182(10)
-*              binary search.
-*
-*          endif .
-*
-*          if sy-subrc eq 0 .
-*
-*            read table t_regup into data(regup)
-*              with key vblnr = reguh-vblnr
-*              binary search.
-*
-*            if sy-subrc eq 0 .
-*
-*              gjahr = regup-laufd(4) .
-*
-*              read table t_bseg into data(bseg)
-*                with key bukrs = regup-zbukr
-*                         belnr = regup-belnr
-*                         gjahr = regup-gjahr
-*                binary search.
-*
-*              if sy-subrc eq 0 .
-*
-*                me->get_info_barcode(
-*                  exporting
-*                    zbukr   = regup-zbukr
-*                    belnr   = regup-belnr
-*                    gjahr   = regup-gjahr
-*                    buzei   = '001'
-*                  changing
-*                    detalhe = detalhe
-*                ).
-*
-*                detalhe+65(30) = reguh-name1.
-*                vblnr          = regup-vblnr.
-*                zfbdt+6(2)     = bseg-zfbdt+6(2) + bseg-zbd1t.
-*
-*
-*              else .
-*
-*                continue .
-*
-*              endif .
-*
-*            else .
-*
-*              continue .
-*
-*            endif .
-*
-*          else .
-*
-*            continue .
-*
-*          endif .
-*
-*
-*          case detalhe(3) .
-*
-*            when '033' .
-*
-*              detalhe+11(2) = '11' .
-*
-**             Data de Vencimento
-*              me->date(
-*                exporting
-*                  date      = bseg-zfbdt
-*                importing
-*                  date_file = detalhe+91(8)
-*              ) .
-*
-**             Data de Pagamento
-*              me->date(
-*                exporting
-*                  date      = bseg-fdtag
-*                importing
-*                  date_file = detalhe+99(8)
-*              ) .
-*
-**             Valor do Pagamento
-*              detalhe+107(14) = detalhe+120(14) .
-*
-**             Filter
-*              me->preencher_espaco(
-*                exporting
-*                  caracter_inicial = 163
-*                  caracter_final   = 230
-*                changing
-*                  detalhe          = detalhe
-*              ).
-*            when '341' .
-*
-**             Data de Vencimento
-*              detalhe+95(2)     = bseg-zfbdt+6(2).
-*              detalhe+97(2)     = bseg-zfbdt+4(2).
-*              detalhe+99(4)     = bseg-zfbdt(4).
-*              detalhe+103(3)    = 'REA'.
-*
-*              clear detalhe+106(15).
-*
-*              move reguh-rbetr to rbetr_c .
-*
-*              unpack rbetr_c      to detalhe+121(15) .
-*              detalhe+136(2)    = reguh-laufd+6(2).
-*              detalhe+138(2)    = reguh-laufd+4(2).
-*              detalhe+140(4)    = reguh-laufd(4).
-*
-*              unpack rbetr_c        to detalhe+144(15).
-*
-*              clear detalhe+159(15).
-*
-*              unpack regup-belnr    to detalhe+174(20).
-*
-*              unpack '0'              to detalhe+195(45).
-*
-*            when '104' .
-*
-**             Número documento atribuído pela empresa
-**             detalhe+74(6) = '' .
-*
-**             Filler
-*              me->preencher_espaco(
-*                exporting
-*                  caracter_inicial = 80
-*                  caracter_final   = 92
-*                changing
-*                  detalhe          = detalhe
-*              ).
-*
-**             Data de Vencimento
-*              detalhe+95(2)     = bseg-zfbdt+6(2).
-*              detalhe+97(2)     = bseg-zfbdt+4(2).
-*              detalhe+99(4)     = bseg-zfbdt(4).
-*              detalhe+103(3)    = 'REA'.
-*
-*              clear detalhe+106(15).
-*
-*              move reguh-rbetr to rbetr_c .
-*
-**             Número do documento banco
-*              unpack '0' to detalhe+134(8) .
-*
-*              unpack rbetr_c      to detalhe+121(15) .
-*              detalhe+136(2)    = reguh-laufd+6(2).
-*              detalhe+138(2)    = reguh-laufd+4(2).
-*              detalhe+140(4)    = reguh-laufd(4).
-*
-*              unpack rbetr_c        to detalhe+144(15).
-*
-**             Indicador de forma de parcelamento
-*              detalhe+149(1)    = '1' .
-*
-**             Número parcela
-*              detalhe+152(2)    = '00' .
-*
-*              clear detalhe+159(15).
-*
-*              unpack regup-belnr    to detalhe+174(20).
-*
-*              unpack '0'              to detalhe+195(45).
-*
-**             Finalidade DOC
-*              detalhe+217(2)    = '07' .
-*
-*            when others .
-*
-**             Data de Vencimento
-*              detalhe+95(2)     = bseg-zfbdt+6(2).
-*              detalhe+97(2)     = bseg-zfbdt+4(2).
-*              detalhe+99(4)     = bseg-zfbdt(4).
-*              detalhe+103(3)    = 'REA'.
-*
-*              clear detalhe+106(15).
-*
-*              move reguh-rbetr to rbetr_c .
-*
-*              unpack rbetr_c      to detalhe+121(15) .
-*              detalhe+136(2)    = reguh-laufd+6(2).
-*              detalhe+138(2)    = reguh-laufd+4(2).
-*              detalhe+140(4)    = reguh-laufd(4).
-*
-*              unpack rbetr_c        to detalhe+144(15).
-*
-*              clear detalhe+159(15).
-*
-*              unpack regup-belnr    to detalhe+174(20).
-*
-*              unpack '0'              to detalhe+195(45).
-*
-*
-*          endcase .
-*
-*        when 'B' .
-*
-*          case detalhe(3) .
-*
-*            when '033' .
-*
-*              clear detalhe+240 .
-*              detalhe+210(4)  = sy-uzeit(4) .
-*              detalhe+214(10) = '          ' .
-*              detalhe+225(4)  = '0000' .
-*
-*              detalhe+229(1)  = '0' .
-*
-*              me->preencher_espaco(
-*                exporting
-*                  caracter_inicial = 231
-*                  caracter_final   = 232
-*                changing
-*                  detalhe          = detalhe
-*              ).
-*
-*            when '104' .
-*
-*              me->preencher_espaco(
-*                exporting
-*                  caracter_inicial = 226
-*                  caracter_final   = 240
-*                changing
-*                  detalhe          = detalhe
-*              ).
-*
-*            when others .
-*
-*          endcase.
-*
-*
-*        when others .
-*
-*      endcase.
-*
-*
-*
-*      data(len) = strlen( detalhe ) .
-*
-*      if len lt 240 . " Quantidade de registro por linha
-*
-*        me->preencher_espaco(
-*          exporting
-*            caracter_inicial = len
-*            caracter_final   = 240
-*          changing
-*            detalhe          = detalhe
-*        ).
-*
-*      endif .
 
       modify t_detalhe from detalhe index tabix .
 
@@ -707,12 +413,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod .
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->CHANGE_INFO_DETALHES_001
-* +-------------------------------------------------------------------------------------------------+
-* | [<-->] DETALHE                        TYPE        TY_DETALHE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method change_info_detalhes_001.
 
     check detalhe(3) eq c_banco_brasil .
@@ -727,12 +427,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->CHANGE_INFO_DETALHES_104
-* +-------------------------------------------------------------------------------------------------+
-* | [<-->] DETALHE                        TYPE        TY_DETALHE
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method change_info_detalhes_104 .
 
     check detalhe(3) eq c_caixa .
@@ -746,6 +440,7 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
 *       030 a 033 - preencher com a operação da conta
         detalhe+29(3) = me->get_pf_pj( detalhe = detalhe ) .
+
 *       De 034 a 041 - preencher com o número da conta corrente
         me->get_bank_client(
           exporting
@@ -755,7 +450,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 *            agencia =
              conta   = detalhe+33(8)
         ).
-
 
 *       Número documento atribuído pela empresa
         detalhe+73(1) = '0' .
@@ -822,12 +516,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->CHANGE_INFO_FIM
-* +-------------------------------------------------------------------------------------------------+
-* | [<-->] FIM                            TYPE        CHAR1000SF
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method change_info_fim.
 
     if fim is not initial .
@@ -857,12 +545,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->CHANGE_INFO_RODAPE
-* +-------------------------------------------------------------------------------------------------+
-* | [<-->] RODAPE                         TYPE        CHAR1000SF
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method change_info_rodape .
 
     if rodape is not initial .
@@ -905,12 +587,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->CHANGE_INICIO
-* +-------------------------------------------------------------------------------------------------+
-* | [<-->] INICIO                         TYPE        CHAR1000SF
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method change_inicio.
 
     if inicio is not initial .
@@ -935,7 +611,7 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
           inicio+45(4) = '0000' .
 
 *         Número da conta
-*         Pos 59 a 70 – Número da conta: Preencher conforme detalhamento do item 0.16, página 2 do layout (anexo).
+*         Pos 59 a 70 – Número da conta: Preencher conforme detalhamento do item 0.16
           inicio+58(4) = '0003' .
 
           unpack '0' to inicio+201(39).
@@ -984,9 +660,7 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
               line  = inicio
           ).
 
-
         when c_banco_brasil .
-
 
         when others .
 
@@ -996,13 +670,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->CHECK_CENARIO
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] INICIO                         TYPE        CHAR1000SF
-* | [<-->] ERROR                          TYPE        FLAG
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method check_cenario.
 
     case inicio(3) .
@@ -1016,16 +683,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
     endcase .
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Static Public Method ZCL_FI_PGTO_FORNECEDORES=>GET_BANK_104
-* +-------------------------------------------------------------------------------------------------+
-* | [<---] BANCO                          TYPE        CHAR3
-* | [<---] AGENCIA                        TYPE        CHAR4
-* | [<---] CONTA                          TYPE        CHAR8
-* | [<---] DIGITO_AGENCIA                 TYPE        CHAR1
-* | [<---] DIGITO_CONTA                   TYPE        CHAR1
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method get_bank_104.
 
     select acc_id, banks, bankl, acc_num, acc_type_id, valid_from, valid_to, control_key
@@ -1042,9 +699,7 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
       try .
 
           banco   = line-bankl(3) .
-
           agencia = line-bankl+4 .
-
           conta   = line-acc_num .
           unpack conta to conta .
 
@@ -1059,16 +714,7 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->GET_BANK_CLIENT
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] DETALHE                        TYPE        TY_DETALHE
-* | [<---] BANCO                          TYPE        CHAR3
-* | [<---] AGENCIA                        TYPE        CHAR4
-* | [<---] CONTA                          TYPE        CHAR8
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  method get_bank_client.
+method get_bank_client.
 
     data:
       line_bseg type ty_bseg .
@@ -1090,9 +736,7 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
       if sy-subrc eq 0 .
 
         banco   = line-bankl(3) .
-
         agencia = line-bankl+4 .
-
         conta   = line-bankn .
         unpack '0' to conta .
 
@@ -1102,89 +746,75 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
+  method get_data .
 
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method ZCL_FI_PGTO_FORNECEDORES->GET_DATA
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] REGUT                          TYPE        REGUT
-* +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD get_data .
-
-    REFRESH:
+    refresh:
       t_reguh, t_regup .
 
-    SELECT laufd laufi xvorl zbukr lifnr kunnr
+    select laufd laufi xvorl zbukr lifnr kunnr
            empfg vblnr name1 rzawe rbetr augdt ausfd
-      FROM reguh
-      INTO TABLE t_reguh
-     WHERE laufd EQ regut-laufd
-       AND laufi EQ regut-laufi
-       AND zbukr EQ regut-zbukr .
+      from reguh
+      into table t_reguh
+     where laufd eq regut-laufd
+       and laufi eq regut-laufi
+       and zbukr eq regut-zbukr .
 
-    IF sy-subrc EQ 0 .
+    if sy-subrc eq 0 .
 
-      SELECT laufd laufi xvorl zbukr lifnr kunnr empfg vblnr
+      select laufd laufi xvorl zbukr lifnr kunnr empfg vblnr
              bukrs belnr gjahr buzei zfbdt zbd1t esrnr esrre
-        FROM regup INTO TABLE t_regup
-         FOR ALL ENTRIES IN t_reguh
-       WHERE laufi EQ regut-laufi
-         AND laufd EQ regut-laufd
-         AND zbukr EQ regut-zbukr
-         AND vblnr EQ t_reguh-vblnr.
+        from regup 
+        into table t_regup
+         for all entries in t_reguh
+       where laufi eq regut-laufi
+         and laufd eq regut-laufd
+         and zbukr eq regut-zbukr
+         and vblnr eq t_reguh-vblnr.
 
-      IF sy-subrc EQ 0 .
+      if sy-subrc eq 0 .
 
-        SORT t_reguh BY rzawe DESCENDING .
+        sort t_reguh by rzawe descending .
 
-        SORT t_regup BY zbukr ASCENDING
-                        belnr ASCENDING
-                        gjahr ASCENDING .
+        sort t_regup by zbukr ascending
+                        belnr ascending
+                        gjahr ascending .
 
-        SELECT bukrs belnr gjahr buzei sgtxt fdtag lifnr zfbdt zbd1t
-          FROM bseg
-          INTO TABLE t_bseg
-           FOR ALL ENTRIES IN t_regup
-         WHERE bukrs EQ t_regup-zbukr
-           AND belnr EQ t_regup-belnr
-           AND gjahr EQ t_regup-gjahr .
+        select bukrs belnr gjahr buzei sgtxt fdtag lifnr zfbdt zbd1t
+          from bseg
+          into table t_bseg
+           for all entries in t_regup
+         where bukrs eq t_regup-zbukr
+           and belnr eq t_regup-belnr
+           and gjahr eq t_regup-gjahr .
 
-        IF sy-subrc EQ 0.
+        if sy-subrc eq 0 .
 
-          SELECT partner taxtype
-            FROM dfkkbptaxnum
-            INTO TABLE t_dfkkbptaxnum
-             FOR ALL ENTRIES IN t_bseg
-           WHERE partner EQ t_bseg-lifnr .
+          select partner taxtype
+            from dfkkbptaxnum
+            into table t_dfkkbptaxnum
+             for all entries in t_bseg
+           where partner eq t_bseg-lifnr .
 
-          IF sy-subrc EQ 0 .
-          ENDIF .
+          if sy-subrc eq 0 .
+          endif .
 
-          SELECT partner bkvid banks bankl bankn
-            FROM but0bk
-            INTO TABLE t_but0bk
-             FOR ALL ENTRIES IN t_bseg
-           WHERE partner EQ t_bseg-lifnr .
+          select partner bkvid banks bankl bankn
+            from but0bk
+            into table t_but0bk
+             for all entries in t_bseg
+           where partner eq t_bseg-lifnr .
 
-          IF sy-subrc EQ 0 .
-          ENDIF .
+          if sy-subrc eq 0 .
+          endif .
 
-        ENDIF.
+        endif.
 
-      ENDIF.
+      endif.
 
-    ENDIF.
+    endif.
 
-  ENDMETHOD.
+  endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->GET_DETAIL
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] DETALHE                        TYPE        TY_DETALHE
-* | [<---] REGUH                          TYPE        TY_REGUH
-* | [<---] REGUP                          TYPE        TY_REGUP
-* | [<---] BSEG                           TYPE        TY_BSEG
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method get_detail.
 
     read table t_reguh into reguh
@@ -1218,18 +848,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->GET_INFO_FILE
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] ARQUIVO                        TYPE        TAB_ARQUIVO
-* | [<---] INICIO                         TYPE        CHAR1000SF
-* | [<---] CABECALHO                      TYPE        BU_TXT10000
-* | [<---] T_DETALHE                      TYPE        TAB_DETALHE
-* | [<---] RODAPE                         TYPE        CHAR1000SF
-* | [<---] FIM                            TYPE        CHAR1000SF
-* | [<---] FILENAME                       TYPE        STRING
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method get_info_file .
 
     data:
@@ -1265,13 +883,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod .
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->GET_PF_PJ
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] DETALHE                        TYPE        TY_DETALHE
-* | [<-()] VALUE                          TYPE        CHAR3
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method get_pf_pj.
 
     data:
@@ -1310,17 +921,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod.
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Private Method ZCL_FI_PGTO_FORNECEDORES->SET_INFO_FILE
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] INICIO                         TYPE        CHAR1000SF
-* | [--->] CABECALHO                      TYPE        BU_TXT10000
-* | [--->] T_DETALHE                      TYPE        TAB_DETALHE
-* | [--->] RODAPE                         TYPE        CHAR1000SF
-* | [--->] FIM                            TYPE        CHAR1000SF
-* | [<-->] T_ARQUIVO                      TYPE        TAB_ARQUIVO
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method set_info_file .
 
     data:
@@ -1353,14 +953,6 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
 
   endmethod .
 
-
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Protected Method ZCL_FI_PGTO_FORNECEDORES->SPACE
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] BEGIN                          TYPE        I (default =0)
-* | [--->] END                            TYPE        I (default =0)
-* | [<-->] LINE                           TYPE        ANY
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   method space .
 
     data:
@@ -1387,4 +979,5 @@ CLASS ZCL_FI_PGTO_FORNECEDORES IMPLEMENTATION.
     endif .
 
   endmethod.
-ENDCLASS.
+  
+endclass .
