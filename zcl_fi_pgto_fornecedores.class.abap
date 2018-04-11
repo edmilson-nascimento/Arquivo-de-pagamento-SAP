@@ -1,983 +1,2026 @@
-class zcl_fi_pgto_fornecedores definition
+class ZCL_FI_PGTO_CONCESSIONARIAS definition
   public
   final
   create public .
 
-  public section.
+public section.
 
-    types:
-      begin of ty_reguh,
-        laufd type reguh-laufd,
-        laufi type reguh-laufi,
-        xvorl type reguh-xvorl,
-        zbukr type reguh-zbukr,
-        lifnr type reguh-lifnr,
-        kunnr type reguh-kunnr,
-        empfg type reguh-empfg,
-        vblnr type reguh-vblnr,
-        name1 type reguh-name1,
-        rzawe type reguh-rzawe,
-        rbetr type reguh-rbetr,
-        augdt type reguh-augdt,
-        ausfd type reguh-ausfd,
-        rwbtr type reguh-rwbtr,
-      end of ty_reguh,
+  types:
+    BEGIN OF ty_reguh,
+        laufd TYPE reguh-laufd,
+        laufi TYPE reguh-laufi,
+        xvorl TYPE reguh-xvorl,
+        zbukr TYPE reguh-zbukr,
+        lifnr TYPE reguh-lifnr,
+        kunnr TYPE reguh-kunnr,
+        empfg TYPE reguh-empfg,
+        vblnr TYPE reguh-vblnr,
+        name1 TYPE reguh-name1,
+        rzawe TYPE reguh-rzawe,
+        rbetr TYPE reguh-rbetr,
+        augdt TYPE reguh-augdt, "SVT - ACPM - 26.06.2017
+        ausfd TYPE reguh-ausfd, "SVT - ACPM - 26.06.2017
+        rwbtr TYPE reguh-rwbtr, "SVT - ACPM - 06.07.2017
+      END OF ty_reguh .
+  types:
+    BEGIN OF ty_regup,
+        laufd TYPE regup-laufd,
+        laufi TYPE regup-laufi,
+        xvorl TYPE regup-xvorl,
+        zbukr TYPE regup-zbukr,
+        lifnr TYPE regup-lifnr,
+        kunnr TYPE regup-kunnr,
+        empfg TYPE regup-empfg,
+        vblnr TYPE regup-vblnr,
+        bukrs TYPE regup-bukrs,
+        belnr TYPE regup-belnr,
+        gjahr TYPE regup-gjahr,
+        buzei TYPE regup-buzei,
+        zfbdt TYPE regup-zfbdt,
+        zbd1t TYPE regup-zbd1t,
+        esrnr TYPE regup-esrnr,
+        esrre TYPE regup-esrre,
+      END OF ty_regup .
+  types:
+    BEGIN OF ty_bseg,
+        bukrs TYPE bseg-bukrs,
+        belnr TYPE bseg-belnr,
+        gjahr TYPE bseg-gjahr,
+        buzei TYPE bseg-buzei,
+        sgtxt TYPE bseg-sgtxt,
+        fdtag TYPE bseg-fdtag,
+        zfbdt TYPE bseg-zfbdt,
+        zbd1t TYPE bseg-zbd1t,
+      END OF ty_bseg .
+  types TY_ARQUIVO type BU_TXT10000 .
+  types TY_DETALHE type BU_TXT10000 .
+  types:
+    tab_regup   TYPE TABLE OF ty_regup .
+  types:
+    tab_reguh   TYPE TABLE OF ty_reguh .
+  types:
+    tab_bseg    TYPE TABLE OF ty_bseg .
+  types:
+    tab_arquivo TYPE TABLE OF bu_txt10000 .
+  types:
+    tab_detalhe TYPE TABLE OF ty_detalhe .
 
-      begin of ty_regup,
-        laufd type regup-laufd,
-        laufi type regup-laufi,
-        xvorl type regup-xvorl,
-        zbukr type regup-zbukr,
-        lifnr type regup-lifnr,
-        kunnr type regup-kunnr,
-        empfg type regup-empfg,
-        vblnr type regup-vblnr,
-        bukrs type regup-bukrs,
-        belnr type regup-belnr,
-        gjahr type regup-gjahr,
-        buzei type regup-buzei,
-        zfbdt type regup-zfbdt,
-        zbd1t type regup-zbd1t,
-        esrnr type regup-esrnr,
-        esrre type regup-esrre,
-      end of ty_regup,
+  methods CONSTRUCTOR .
+  methods GET_DATA
+    importing
+      !REGUT type REGUT .
+  methods CHANGE_FILE
+    importing
+      !I_FILENAME type RLGRAP-FILENAME
+      !T_FILE type TAB_ARQUIVO .
+  class-methods PREENCHER_ESPACO
+    importing
+      !CARACTER_INICIAL type I
+      !CARACTER_FINAL type I
+    changing
+      !DETALHE type TY_DETALHE .
+  class-methods DATE
+    importing
+      !DATE type SYDATUM
+    exporting
+      !DATE_FILE type CHAR8 .
+  methods CHECK_FILE
+    importing
+      !I_FILENAME type RLGRAP-FILENAME
+    exporting
+      !T_ARQUIVO type TAB_ARQUIVO
+      !E_MEIO_PAGAMENTO type CHAR2 .
+  PROTECTED SECTION.
 
-      begin of ty_bseg,
-        bukrs type bseg-bukrs,
-        belnr type bseg-belnr,
-        gjahr type bseg-gjahr,
-        buzei type bseg-buzei,
-        sgtxt type bseg-sgtxt,
-        fdtag type bseg-fdtag,
-        lifnr type bseg-lifnr,
-        zfbdt type bseg-zfbdt,
-        zbd1t type bseg-zbd1t,
-      end of ty_bseg,
+private section.
 
-      begin of ty_dfkkbptaxnum,
-        partner type dfkkbptaxnum-partner,
-        taxtype type dfkkbptaxnum-partner,
-      end of ty_dfkkbptaxnum,
+  constants:
+    c_santander    TYPE c LENGTH 3 value '033' ##NO_TEXT.
+  constants:
+    c_caixa        TYPE c LENGTH 3 value '104' ##NO_TEXT.
+  constants:
+    c_itau         TYPE c LENGTH 3 value '341' ##NO_TEXT.
+  constants:
+    c_banco_brasil TYPE c LENGTH 3 value '001' ##NO_TEXT.
+  class-data T_REGUH type TAB_REGUH .
+  class-data T_REGUP type TAB_REGUP .
+  class-data T_BSEG type TAB_BSEG .
+  class-data CARACTER_SPACE type C .
 
-      begin of ty_but0bk,
-        partner type but0bk-partner,
-        bkvid   type but0bk-bkvid,
-        banks   type but0bk-banks,
-        bankl   type but0bk-bankl,
-        bankn   type but0bk-bankn,
-      end of ty_but0bk,
+  methods GET_INFO_FILE
+    importing
+      !ARQUIVO type TAB_ARQUIVO
+    exporting
+      !INICIO type CHAR1000SF
+      !CABECALHO type BU_TXT10000
+      !T_DETALHE type TAB_DETALHE
+      !RODAPE type CHAR1000SF
+      !FIM type CHAR1000SF
+      !FILENAME type STRING .
+  methods CHANGE_INICIO
+    changing
+      !INICIO type CHAR1000SF .
+  methods CHANGE_CABECALHO_F
+    changing
+      !CABECALHO type BU_TXT10000 .
+  methods CHANGE_CABECALHO_G
+    changing
+      !CABECALHO type BU_TXT10000 .
+  methods CHANGE_INFO_DETALHES
+    changing
+      !T_DETALHE type TAB_DETALHE .
+  methods CHANGE_INFO_DETALHES_033
+    changing
+      !DETALHE type TY_DETALHE .
+  methods CHANGE_INFO_DETALHES_341
+    changing
+      !DETALHE type TY_DETALHE .
+  methods CHANGE_INFO_DETALHES_104
+    changing
+      !DETALHE type TY_DETALHE .
+  methods CHANGE_INFO_DETALHES_001
+    changing
+      !DETALHE type TY_DETALHE .
+  methods CHANGE_INFO_DETALHES_OTHERS
+    changing
+      !DETALHE type TY_DETALHE .
+  methods CHANGE_INFO_RODAPE
+    importing
+      !DETALHE type TAB_DETALHE
+    changing
+      !RODAPE type CHAR1000SF .
+  methods CHANGE_INFO_FIM
+    importing
+      !DETALHE type TAB_DETALHE
+    changing
+      !FIM type CHAR1000SF .
+  methods GET_INFO_BARCODE
+    importing
+      !ZBUKR type DZBUKR
+      !BELNR type BELNR_D
+      !GJAHR type GJAHR
+      !BUZEI type BUZEI
+    exporting
+      !VALOR type CHAR15
+    changing
+      !DETALHE type TY_DETALHE .
+  methods GET_INFO_TEXT
+    importing
+      !ID type TDID
+      !LANGUAGE type SPRAS default 'P'
+      !NAME type TDOBNAME
+      !OBJECT type TDOBJECT
+    exporting
+      !TDLINE type TDLINE .
+  methods SET_INFO_FILE
+    importing
+      !INICIO type CHAR1000SF
+      !CABECALHO type BU_TXT10000
+      !T_DETALHE type TAB_DETALHE
+      !RODAPE type CHAR1000SF
+      !FIM type CHAR1000SF
+    changing
+      !T_ARQUIVO type TAB_ARQUIVO .
+  methods SPACE
+    importing
+      !BEGIN type I default 0
+      !END type I default 0
+    changing
+      !LINE type ANY .
+  methods GET_DETAIL
+    importing
+      !DETALHE type TY_DETALHE
+    exporting
+      !REGUH type TY_REGUH
+      !REGUP type TY_REGUP
+      !BSEG type TY_BSEG .
+  methods GET_CONTA_CORRENTE_104
+    exporting
+      !CONTA type CHAR12
+      !DIGITO type CHAR1 .
+ENDCLASS.
 
-      ty_detalhe       type bu_txt10000,
-      ty_arquivo       type bu_txt10000,
-      tab_regup        type table of ty_regup,
-      tab_reguh        type table of ty_reguh,
-      tab_bseg         type table of ty_bseg,
-      tab_dfkkbptaxnum type table of ty_dfkkbptaxnum,
-      tab_but0bk       type table of ty_but0bk,
-      tab_arquivo      type table of bu_txt10000,
-      tab_detalhe      type table of ty_detalhe .
-    
-    class-methods get_bank_104
-      exporting
-        !banco          type char3
-        !agencia        type char4
-        !conta          type char8
-        !digito_agencia type char1
-        !digito_conta   type char1 .
 
-    methods get_data
-      importing
-        !regut type regut .
 
-    methods change_file
-      importing
-        !i_filename type rlgrap-filename
-        !t_file     type tab_arquivo .
+CLASS ZCL_FI_PGTO_CONCESSIONARIAS IMPLEMENTATION.
 
-  protected section .
 
-    methods space
-      importing
-        !begin type i default 0
-        !end   type i default 0
-      changing
-        !line  type any .
+  METHOD change_cabecalho_f.
 
-  private section.
+    IF cabecalho IS NOT INITIAL .
 
-    constants:
-      c_santander    type c length 3 value '033',
-      c_caixa        type c length 3 value '104',
-      c_itau         type c length 3 value '341',
-      c_banco_brasil type c length 3 value '001' .
+      CASE cabecalho(3) .
 
-    data:
-      t_reguh        type tab_reguh,
-      t_regup        type tab_regup,
-      t_bseg         type tab_bseg,
-      t_dfkkbptaxnum type tab_dfkkbptaxnum,
-      t_but0bk       type tab_but0bk .
+        WHEN c_santander .
 
-    methods check_cenario
-      importing
-        !inicio type char1000sf
-      changing
-        !error  type flag .
+          cabecalho+9(7) = '2011030' .
+          CLEAR cabecalho+222(8) .
+          UNPACK '0' TO cabecalho+230(10).
 
-    methods get_info_file
-      importing
-        !arquivo   type tab_arquivo
-      exporting
-        !inicio    type char1000sf
-        !cabecalho type bu_txt10000
-        !t_detalhe type tab_detalhe
-        !rodape    type char1000sf
-        !fim       type char1000sf
-        !filename  type string .
+        WHEN c_itau .
 
-    methods change_inicio
-      changing
-        !inicio type char1000sf .
+*         cabecalho+9(7) = '2013030' .
 
-    methods change_cabecalho
-      changing
-        !cabecalho type bu_txt10000 .
+*         20 FORNECEDORES
+          cabecalho+9(2)  = '20' .
+*         13 PAGAMENTO DE CONCESSIONÁRIAS
+          cabecalho+11(2) = '13' .
 
-    methods change_info_detalhes
-      changing
-        !t_detalhe type tab_detalhe .
+          UNPACK '0' TO cabecalho+222(18).
 
-    methods change_info_detalhes_104
-      changing
-        !detalhe type ty_detalhe .
+        WHEN c_caixa .
 
-    methods change_info_detalhes_001
-      changing
-        !detalhe type ty_detalhe .
+          cabecalho+9(7) = '2013030' .
 
-    methods change_info_rodape
-      changing
-        !rodape type char1000sf .
-
-    methods change_info_fim
-      changing
-        !fim type char1000sf .
-
-    methods set_info_file
-      importing
-        !inicio    type char1000sf
-        !cabecalho type bu_txt10000
-        !t_detalhe type tab_detalhe
-        !rodape    type char1000sf
-        !fim       type char1000sf
-      changing
-        !t_arquivo type tab_arquivo .
-
-    methods get_pf_pj
-      importing
-        !detalhe     type ty_detalhe
-      returning
-        value(value) type char3 .
-
-    methods get_bank_client
-      importing
-        !detalhe type ty_detalhe
-      exporting
-        !banco   type char3
-        !agencia type char4
-        !conta   type char8 .
-
-    methods get_detail
-      importing
-        !detalhe type ty_detalhe
-      exporting
-        !reguh   type ty_reguh
-        !regup   type ty_regup
-        !bseg    type ty_bseg .
-        
-endclass.
-
-class zcl_fi_pgto_fornecedores implementation.
-
-  method change_cabecalho.
-
-    if cabecalho is not initial .
-
-      case cabecalho(3) .
-
-        when c_santander .
-
-        when c_itau .
-
-        when c_caixa .
-
-*         1.19    71  71  X(001)  DV da Conta Corrente
-*         1.20    72  72  X(001)  Dígito da Agência/Conta
-          me->get_bank_104(
-            importing
-*             banco          =
-*             agencia        =
-*             conta          =
-              digito_agencia = cabecalho+71(1)
-              digito_conta   = cabecalho+70(1)
-          ).
-
-          me->space(
-            exporting
-              begin = 72
-              end   = 72
-            changing
-              line  = cabecalho
-          ).
-
-*         Versão do leiaute do lote
-*         cabecalho+13(3) = '045' .
+*         1.07 014 016 9(003) Versão do leiaute do lote
           cabecalho+13(3) = '041' .
 
-*         1.13  41  44  9(004)  Código do compromisso
+*         1.12    39  40  2   Tipo de Compromisso 01
+          cabecalho+38(2) = '01' .
+*         1.13    41  44  4   Código do compromisso   0002
+          cabecalho+40(4) = '0002' .
+*         1.14    45  46  2   Parâmetro de transmissão    00
+          cabecalho+44(2) = '00' .
+
           me->space(
-            exporting
-              begin = 41
-              end   = 44
-            changing
+            EXPORTING
+              begin = 47
+              end   = 52
+            CHANGING
               line  = cabecalho
           ).
 
-*         Número da conta
-*         Pos 59 a 70 – Número da conta: Preencher conforme detalhamento do item 0.16
-          cabecalho+58(4) = '0003' .
+          me->get_conta_corrente_104(
+            IMPORTING
+*             conta  = cabecalho+53(12)
+              conta  = cabecalho+58(12)
+*             digito =
+          ).
 
-*         1.30 223 230 X(008) Uso exclusivo FEBRABAN
+*         0.17    71  71  1   DV da conta (5)
+          cabecalho+70(1) = '5' .
+*         0.18    72  72  1   DV da agência/conta (8)
+*         cabecalho+71(1) = '8' .
+          cabecalho+71(1) = ' ' .
+
+          UNPACK '0' TO cabecalho+222(18).
+
           me->space(
-            exporting
+            EXPORTING
               begin = 223
-              end   = 230
-            changing
-              line  = cabecalho
-          ).
-
-*         1.31 231 240 X(010) Ocorrências
-          me->space(
-            exporting
-              begin = 231
               end   = 240
-            changing
+            CHANGING
               line  = cabecalho
           ).
 
-        when c_banco_brasil .
+
+        WHEN c_banco_brasil .
 
           cabecalho+9(2) = '98' .
 
 *         Pagamento de guias com código de barras
           cabecalho+11(2) = '11' .
 
+          cabecalho+45(7) = '       ' .
+
           me->space(
-            exporting
-              begin = 46
-              end   = 52
-            changing
+            EXPORTING
+              begin = 223
+              end   = 240
+            CHANGING
               line  = cabecalho
           ).
 
-        when others .
 
-      endcase.
+        WHEN OTHERS .
 
-    endif .
+          cabecalho+9(7) = '2013030' .
+          UNPACK '0' TO cabecalho+222(18).
+
+      ENDCASE.
+
+    ENDIF .
 
 
-  endmethod.
+  ENDMETHOD.
 
-  method change_file.
 
-    data:
-      inicio      type char1000sf,
-      t_cabecalho type table of char1000sf,
-      cabecalho   type bu_txt10000,
-      t_detalhe   type table of bu_txt10000,
-      detalhe     like line of t_detalhe,
-      rodape      type char1000sf,
-      fim         type char1000sf,
-      error       type flag,
+  METHOD change_cabecalho_g.
 
-      filename    type string,
-      t_arquivo   type tab_arquivo.
+    IF cabecalho IS NOT INITIAL .
 
-    clear:
-      inicio, cabecalho, detalhe, rodape, fim .
-    refresh:
-      t_cabecalho, t_detalhe, t_arquivo .
+      CASE cabecalho(3) .
 
-    filename = i_filename.
-    append lines of t_file to t_arquivo . 
+        WHEN c_santander .
 
-    if lines( t_arquivo ) eq 0 .
-    else .
+          cabecalho+9(7) = '2011030' .
+          CLEAR cabecalho+222(8) .
+          UNPACK '0' TO cabecalho+230(10).
 
-      me->get_info_file(
-        exporting
-          arquivo   = t_arquivo
-        importing
-          inicio    = inicio
-          cabecalho = cabecalho
-          t_detalhe = t_detalhe
-          rodape    = rodape
-          fim       = fim
-          filename  = filename
-      ).
+        WHEN c_itau .
 
-    endif .
+*         cabecalho+9(7) = '2013030' .
 
-*   Verificando se este cenário terá alterações (banco e etc)
-    me->check_cenario(
-      exporting
-        inicio = inicio
-      changing
-        error  = error
-    ).
+*         22 TRIBUTOS
+          cabecalho+9(2)  = '22' .
+*         19 IPTU/ISS/OUTROS TRIBUTOS MUNICIPAIS
+*         35 FGTS
+*         cabecalho+11(2) = '19' .
+          cabecalho+11(2) = '35' .
 
-    check error eq abap_false .
+          UNPACK '0' TO cabecalho+222(18).
 
-    me->change_inicio(
-      changing
-        inicio = inicio
-    ).
+        WHEN c_caixa .
 
-    me->change_cabecalho(
-      changing
-        cabecalho = cabecalho
-    ).
+          cabecalho+9(7) = '2013030' .
 
-    me->change_info_detalhes(
-      changing
-        t_detalhe = t_detalhe
-    ).
+*         1.07 014 016 9(003) Versão do leiaute do lote
+          cabecalho+13(3) = '041' .
+*         1.12    39  40  2   Tipo de Compromisso 01
+          cabecalho+38(2) = '01' .
+*         1.13    41  44  4   Código do compromisso   0002
+          cabecalho+40(4) = '0002' .
+*         1.14    45  46  2   Parâmetro de transmissão    00
+          cabecalho+44(2) = '00' .
 
-    me->change_info_rodape(
-      changing
-        rodape = rodape
-    ).
+          me->space(
+            EXPORTING
+              begin = 47
+              end   = 52
+            CHANGING
+              line  = cabecalho
+          ).
 
-    me->change_info_fim(
-      changing
-        fim = fim
-    ).
+          me->get_conta_corrente_104(
+            IMPORTING
+              conta  = cabecalho+58(12)
+*             digito =
+          ).
 
-    me->set_info_file(
-      exporting
+*         0.17    71  71  1   DV da conta (5)
+          cabecalho+70(1) = '5' .
+*         0.18    72  72  1   DV da agência/conta (8)
+*         cabecalho+71(1) = '8' .
+          cabecalho+71(1) = ' ' .
+
+          UNPACK '0' TO cabecalho+222(18).
+
+          me->space(
+            EXPORTING
+              begin = 223
+              end   = 240
+            CHANGING
+              line  = cabecalho
+          ).
+
+
+        WHEN c_banco_brasil .
+
+          cabecalho+9(2) = '98' .
+
+*         Pagamento de guias com código de barras
+          cabecalho+11(2) = '11' .
+
+          cabecalho+45(7) = '       ' .
+
+          me->space(
+            EXPORTING
+              begin = 223
+              end   = 240
+            CHANGING
+              line  = cabecalho
+          ).
+
+
+        WHEN OTHERS .
+
+          cabecalho+9(7) = '2013030' .
+          UNPACK '0' TO cabecalho+222(18).
+
+      ENDCASE.
+
+    ENDIF .
+
+  ENDMETHOD.
+
+
+  METHOD change_file.
+
+* Para a solução atual, será feito apenas para F
+* logo, por causa de tempo de entrega, será fixo apenas para este cenário.
+
+    DATA:
+      inicio           TYPE char1000sf,
+      t_cabecalho      TYPE TABLE OF char1000sf,
+      cabecalho        TYPE bu_txt10000,
+      t_detalhe        TYPE TABLE OF bu_txt10000,
+      detalhe          LIKE LINE OF t_detalhe,
+      rodape           TYPE char1000sf,
+      fim              TYPE char1000sf,
+      v_gjahr          TYPE bseg-gjahr,
+      filename         TYPE string,
+      t_arquivo        TYPE tab_arquivo,
+
+* I - LAPM - 16/08/2017 - CH8568
+      lt_reguh         TYPE tab_reguh.
+* F - LAPM - 16/08/2017 - CH8568
+
+* I - 16/08/2017 - CH8568
+
+*    CASE reguh-rzawe .
+*
+*      WHEN 'F' OR 'G' .
+*
+*        CLEAR: inicio, cabecalho, detalhe, rodape, fim, v_gjahr.
+*        REFRESH: t_cabecalho, t_detalhe, t_arquivo .
+*
+*        filename = i_filename.
+*
+*        CALL FUNCTION 'GUI_UPLOAD'
+*          EXPORTING
+*            filename = filename
+*            filetype = 'ASC'
+*          TABLES
+*            data_tab = t_arquivo.
+
+    CLEAR: inicio, cabecalho, detalhe, rodape, fim, v_gjahr.
+    REFRESH: t_cabecalho, t_detalhe, t_arquivo .
+
+    filename    = i_filename.
+    lt_reguh[]  = t_reguh[].
+    t_arquivo[] = t_file[].
+
+
+* F - 16/08/2017 - CH8568
+
+    CHECK lines( t_arquivo ) GT 0.
+
+    me->get_info_file(
+      EXPORTING
+        arquivo   = t_arquivo
+      IMPORTING
         inicio    = inicio
         cabecalho = cabecalho
         t_detalhe = t_detalhe
         rodape    = rodape
         fim       = fim
-      changing
+        filename  = filename
+     ).
+
+    me->change_inicio(
+      CHANGING
+        inicio = inicio
+    ).
+
+* I - 16/08/2017 - CH8568
+
+**    CASE reguh-rzawe.
+*
+*      WHEN 'F'.
+*        me->change_cabecalho_f(
+*          CHANGING
+*            cabecalho = cabecalho
+*        ).
+*
+*      WHEN 'G'.
+*        me->change_cabecalho_g(
+*          CHANGING
+*            cabecalho = cabecalho
+*        ).
+*
+*    ENDCASE.
+
+    SORT lt_reguh BY rzawe.
+
+    READ TABLE lt_reguh WITH KEY rzawe = 'G' BINARY SEARCH
+                                             TRANSPORTING NO FIELDS.
+
+    IF sy-subrc EQ 0.
+      me->change_cabecalho_g(
+        CHANGING
+          cabecalho = cabecalho
+      ).
+    ELSE.
+      me->change_cabecalho_f(
+        CHANGING
+          cabecalho = cabecalho
+      ).
+    ENDIF.
+* F - 16/08/2017 - CH8568
+
+    me->change_info_detalhes(
+      CHANGING
+        t_detalhe = t_detalhe
+    ).
+
+    me->change_info_rodape(
+     EXPORTING detalhe = t_detalhe  " Chamado 8183
+      CHANGING rodape  = rodape
+    ).
+
+    me->change_info_fim(
+      EXPORTING detalhe = t_detalhe  " Chamado 8183
+       CHANGING fim     = fim
+    ).
+
+    me->set_info_file(
+      EXPORTING
+        inicio    = inicio
+        cabecalho = cabecalho
+        t_detalhe = t_detalhe
+        rodape    = rodape
+        fim       = fim
+      CHANGING
         t_arquivo = t_arquivo
     ).
 
-    call function 'GUI_DOWNLOAD'
-      exporting
+    CALL FUNCTION 'GUI_DOWNLOAD'
+      EXPORTING
         filename = filename
         filetype = 'ASC'
-      tables
+      TABLES
         data_tab = t_arquivo.
 
-  endmethod.
+*  WHEN OTHERS.
+*ENDCASE.
 
-  method change_info_detalhes .
+  ENDMETHOD.
 
-    loop at t_detalhe into data(detalhe) .
 
-      data(tabix) = sy-tabix .
+  METHOD change_info_detalhes .
 
-      case detalhe(3) . " Banco
+    DATA:
+      vblnr   TYPE vblnr,
+      zfbdt   TYPE dzfbdt,
+      rbetr_c TYPE char13,
+      output  TYPE char12.
 
-        when c_santander .
+    SORT: t_reguh BY vblnr ASCENDING,
+          t_regup BY vblnr ASCENDING,
+          t_bseg  BY bukrs ASCENDING
+                     belnr ASCENDING
+                     gjahr ASCENDING
+                     buzei ASCENDING .
 
-        when c_itau .
+    LOOP AT t_detalhe INTO DATA(detalhe) .
 
-        when c_caixa .
+      DATA(tabix) = sy-tabix .
 
-          me->change_info_detalhes_104(
-            changing
+      CASE detalhe(3) .
+
+        WHEN c_santander .
+* I - SVT - ACPM - 14.06.2017 - Retira o registro B
+          IF detalhe+13(1) = 'B'.
+            DELETE t_detalhe INDEX tabix.
+            CONTINUE.
+          ENDIF.
+* I - SVT - ACPM - 14.06.2017
+
+          me->change_info_detalhes_033(
+            CHANGING
               detalhe = detalhe
           ).
 
-        when others .
+        WHEN c_itau.
 
-      endcase.
+          me->change_info_detalhes_341(
+            CHANGING
+              detalhe = detalhe
+          ).
 
-      modify t_detalhe from detalhe index tabix .
+        WHEN c_caixa .
 
-    endloop.
+          me->change_info_detalhes_104(
+            CHANGING
+              detalhe = detalhe
+          ).
 
-  endmethod .
+        WHEN c_banco_brasil .
 
-  method change_info_detalhes_001.
+          IF detalhe+13(1) EQ 'B' .
 
-    check detalhe(3) eq c_banco_brasil .
+            DELETE t_detalhe INDEX tabix .
 
-    case detalhe+13(1) .
+          ELSE .
 
-      when 'A' .
+            me->change_info_detalhes_001(
+              CHANGING
+                detalhe = detalhe
+            ).
 
-      when others .
+          ENDIF .
 
-    endcase.
+        WHEN OTHERS .
 
-  endmethod.
+          me->change_info_detalhes_others(
+            CHANGING
+              detalhe = detalhe
+          ).
 
-  method change_info_detalhes_104 .
+      ENDCASE .
 
-    check detalhe(3) eq c_caixa .
 
-*   Verificando segumento
-    case detalhe+13(1) .
+      DATA(len) = strlen( detalhe ) .
 
-      when 'A' .
+      IF len LT 240 . " Quantidade de registro por linha
 
-*       A.12 030 041 9(012) Conta Corrente Destino
+* I - SVT - LAPM - 04.07.2017 - CH8568
+        IF detalhe+229(1) IS NOT INITIAL.
+          ADD 1 TO len.
+        ENDIF.
+* F - SVT - LAPM - 04.07.2017 - CH8568
 
-*       030 a 033 - preencher com a operação da conta
-        detalhe+29(3) = me->get_pf_pj( detalhe = detalhe ) .
-
-*       De 034 a 041 - preencher com o número da conta corrente
-        me->get_bank_client(
-          exporting
-            detalhe = detalhe
-           importing
-*            banco   =
-*            agencia =
-             conta   = detalhe+33(8)
-        ).
-
-*       Número documento atribuído pela empresa
-        detalhe+73(1) = '0' .
-
-*       Filler
-        zcl_fi_pgto_concessionarias=>preencher_espaco(
-          exporting
-            caracter_inicial = 80
-            caracter_final   = 92
-          changing
+        me->preencher_espaco(
+          EXPORTING
+            caracter_inicial = len
+            caracter_final   = 240
+          CHANGING
             detalhe          = detalhe
         ).
 
-*       Número do documento banco
-        unpack '0' to detalhe+134(9) .
+      ENDIF .
 
-*       Quantidade de parcelas
-        detalhe+146(2) = '01' .
+      MODIFY t_detalhe FROM detalhe INDEX tabix .
 
-*       Indicador de bloqueio
-        detalhe+148(1) = 'N' .
+    ENDLOOP.
 
-*       Indicador de forma de parcelamento
-        detalhe+149(1) = '1' .
+  ENDMETHOD .
 
-*       Período ou dia de vencimento
-        detalhe+150(2) = detalhe+93(2) . "Dia da proposta
 
-*       Número parcela
-        detalhe+152(2) = '00' .
+  METHOD change_info_detalhes_001 .
 
-*       Finalidade DOC
-        detalhe+217(2) = '07' .
+    DATA:
+      line_reguh TYPE ty_reguh,
+      line_regup TYPE ty_regup,
+      line_bseg  TYPE ty_bseg,
+      rbetr_c    TYPE char13,
+      valor      TYPE char15.
 
-*       A.36 231 240 X(010) Ocorrências
+    CASE detalhe+13(1) .
+
+      WHEN 'A' .
+
+        me->get_detail(
+          EXPORTING
+            detalhe = detalhe
+          IMPORTING
+            reguh   = line_reguh
+            regup   = line_regup
+            bseg    = line_bseg
+        ).
+
+        me->get_info_barcode(
+          EXPORTING
+            zbukr   = line_regup-zbukr
+            belnr   = line_regup-belnr
+            gjahr   = line_regup-gjahr
+            buzei   = '001'
+           IMPORTING
+           valor = valor
+          CHANGING
+            detalhe = detalhe
+        ).
+
+*       Posições 092 a 099: Preencher com a data de vencimento da guia
+        detalhe+91(8) = detalhe+93(8) .
+
+*       Posições 100 a 107: Preencher com a data de pagamento da guia
+        detalhe+99(8) = detalhe+91(8) .
+
+*       Posições 108 a 122: Preencher com o valor de pagamento
+        valor = detalhe+122(12) .
+        UNPACK valor TO valor .
+        detalhe+107(15) = valor .
+
+*       Posições 123 a 142: Foi informado "000002409654        "
+        detalhe+122(20) = space .
+
+*       Posições 163 a 230: Preencher com brancos
+        detalhe+162(68) = space .
+
+*       Posições 231 a 240: Preencher com brancos
+        detalhe+230(10) = space .
+
+      WHEN 'B' .
+
+        me->get_detail(
+          EXPORTING
+            detalhe = detalhe
+          IMPORTING
+            reguh   = line_reguh
+            regup   = line_regup
+            bseg    = line_bseg
+        ).
+
+*       Data de Vencimento
+        detalhe+95(2)     = line_bseg-zfbdt+6(2).
+        detalhe+97(2)     = line_bseg-zfbdt+4(2).
+        detalhe+99(4)     = line_bseg-zfbdt(4).
+        detalhe+103(3)    = 'REA'.
+
+        CLEAR detalhe+106(15).
+
+        MOVE line_reguh-rbetr TO rbetr_c .
+
+        UNPACK rbetr_c      TO detalhe+121(15) .
+        detalhe+136(2)    = line_reguh-laufd+6(2).
+        detalhe+138(2)    = line_reguh-laufd+4(2).
+        detalhe+140(4)    = line_reguh-laufd(4).
+
+        UNPACK rbetr_c        TO detalhe+144(15).
+
+        CLEAR detalhe+159(15).
+
+        UNPACK line_regup-belnr    TO detalhe+174(20).
+
+        UNPACK '0'              TO detalhe+195(45).
+      WHEN OTHERS .
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD change_info_detalhes_033 .
+
+    DATA:
+      line_bseg TYPE ty_bseg .
+* I - SVT - ACPM - 13.06.2017
+    DATA:
+      line_reguh   TYPE ty_reguh,
+      line_regup   TYPE ty_regup,
+      rbetr_c      TYPE char13,
+      l_codigo(44) TYPE n,
+      l_char(18),
+      l_valor(15)  TYPE n.
+* V - SVT - ACPM - 13.06.2017
+
+    CLEAR: l_codigo, l_valor.
+
+    CASE detalhe+13(1) .
+
+      WHEN 'A' .
+
+* I - SVT - ACPM - 13.06.2017 - Gera registro O, como arquivo Itaú
+        me->get_detail(
+           EXPORTING
+             detalhe = detalhe
+           IMPORTING
+             reguh   = line_reguh
+             regup   = line_regup
+             bseg    = line_bseg
+
+*        me->get_detail(
+*          exporting
+*            detalhe = detalhe
+*          importing
+**             reguh   =
+**             regup   =
+*            bseg    = line_bseg
+      ).
+
+        me->get_info_barcode(
+               EXPORTING
+                 zbukr   = line_regup-zbukr
+                 belnr   = line_regup-belnr
+                 gjahr   = line_regup-gjahr
+                 buzei   = '001'
+               CHANGING
+                 detalhe = detalhe
+        ).
+
+* Nome Concessionária
+        detalhe+61(30) = line_reguh-name1.
+
+*       vblnr          = line_regup-vblnr.
+*       zfbdt+6(2)     = line_bseg-zfbdt+6(2) + line_bseg-zbd1t.
+
+* I - SVT - LAPM - 11.10.2017 - CH8183 - Campos comentados
+
+**       Data de Vencimento
+*        detalhe+95(2)     = line_bseg-zfbdt+6(2).
+*        detalhe+97(2)     = line_bseg-zfbdt+4(2).
+*        detalhe+99(4)     = line_bseg-zfbdt(4).
+*        detalhe+103(3)    = 'REA'.
+
+*        CLEAR detalhe+106(15).
+
+*        MOVE line_reguh-rbetr TO rbetr_c .
+
+*        UNPACK rbetr_c      TO detalhe+121(15) .
+*        detalhe+136(2)    = line_reguh-laufd+6(2).
+*        detalhe+138(2)    = line_reguh-laufd+4(2).
+*        detalhe+140(4)    = line_reguh-laufd(4).
+*
+*        UNPACK rbetr_c        TO detalhe+144(15).
+
+*        CLEAR detalhe+159(15).
+
+*        UNPACK line_regup-belnr TO detalhe+174(20).
+*
+*        UNPACK '0'              TO detalhe+195(45).
+
+* F - SVT - LAPM - 11.10.2017 - CH8183 - Campos comentados
+
+* I - SVT - ACPM - 13.06.2017 - ajustes Arquivo SANTANDER
+
+*Código de barras
+        MOVE detalhe+17(44) TO l_codigo.
+        CLEAR detalhe+17(44).
+        WRITE l_codigo TO detalhe+17(44) RIGHT-JUSTIFIED.
+
+*Data de vencimento
+        CONCATENATE line_reguh-augdt+6(2) line_reguh-augdt+4(2) line_reguh-augdt(4)
+               INTO detalhe+91(8).
+*Data de Pagamento
+        CONCATENATE line_reguh-ausfd+6(2) line_reguh-ausfd+4(2) line_reguh-ausfd(4)
+               INTO detalhe+99(8).
+
+*Valor de Pagamento
+        MOVE line_reguh-rwbtr TO l_char.
+        MOVE l_char+3(15) TO l_valor.
+        CLEAR detalhe+107(15).
+        WRITE l_valor TO detalhe+107(15) RIGHT-JUSTIFIED.
+
+* I - SVT - LAPM - 11.10.2017 - CH8183 -  Nº Documento Cliente , Nº Documento banco e Filler
+
+* Nº Documento Cliente
+        UNPACK line_regup-belnr TO detalhe+122(20).
+
+* Nº Documento banco
+        UNPACK '0' TO detalhe+142(20).
+
+* Filler
+*        detalhe+162(67) = space.
+        CLEAR detalhe+163(67).
+
+* F - SVT - LAPM - 11.10.2017 - CH8183
+
+
+* F - SVT - ACPM - 13.06.2017 - ajustes Arquivo SANTANDER
+
+* I - SVT - ACPM - 06.07.2017 - CH8183
+        detalhe+231(11) = space.
+* F - SVT - ACPM - 06.07.2017 - CH8183
+
+
+*        detalhe+11(2) = '11' .
+*
+**       Data de Vencimento
+*        me->date(
+*          exporting
+*            date      = line_bseg-zfbdt
+*          importing
+*            date_file = detalhe+91(8)
+*        ) .
+*
+**         Data de Pagamento
+*        me->date(
+*          exporting
+*            date      = line_bseg-fdtag
+*          importing
+*            date_file = detalhe+99(8)
+*        ) .
+*
+**       Data do Pagamento 094 101 9(008) DDMMAAAA
+*        detalhe+93(8) = detalhe+91(8) .
+*
+**       Tipo da Moeda 102 104 X(003) Nota G005
+*        detalhe+101(3) = 'BRL' .
+*
+**       Quantidade de Moeda 105 119 9(010)V5 Zeros
+*        me->space(
+*          exporting
+*            begin = 105
+*            end   = 119
+*          changing
+*            line  = detalhe
+*        ).
+*
+**       Filter
+*        me->preencher_espaco(
+*          exporting
+*            caracter_inicial = 163
+**           caracter_final   = 230
+*            caracter_final   = 220
+*          changing
+*            detalhe          = detalhe
+*        ).
+*
+**       Finalidade de TED 220 224 X(05) Nota G013 B
+*        me->space(
+*          exporting
+*            begin = 220
+*            end   = 224
+*          changing
+*            line  = detalhe
+*        ).
+*
+**       Filler 227 229 X(010) Brancos
+*        me->space(
+*          exporting
+*            begin = 227
+*            end   = 229
+*          changing
+*            line  = detalhe
+*        ).
+*
+**       Emissão de Aviso ao Favorecido 230 230 X(001) Nota G018
+**       detalhe+229(1) = '0' .
+*
+*      when 'B' .
+*
+**       Número do Local do Favorecido 063 067 9(005) Opciona
+*        unpack '0' to detalhe+62(5) .
+*
+**       CEP do Favorecido 118 125 9(008) Opcional
+*        unpack '0' to detalhe+117(8) .
+*
+*        clear detalhe+240 .
+*        detalhe+210(4)  = sy-uzeit(4) .
+*        detalhe+214(10) = '          ' .
+*        detalhe+225(4)  = '0000' .
+*
+*        detalhe+229(1)  = '0' .
+*
+**       Filler 231 231 X(001 ) Nota G007
+*        me->space(
+*          exporting
+*            begin = 231
+*            end   = 231
+*          changing
+*            line  = detalhe
+*        ).
+*
+**       TED para Instituição Financeira 232 232 X(001) Nota G029
+*        me->space(
+*          exporting
+*            begin = 232
+*            end   = 232
+*          changing
+*            line  = detalhe
+*        ).
+*
+**       Identificação da IF no SPB 233 240 X(008) Nota G030
+*        me->space(
+*          exporting
+*            begin = 233
+*            end   = 240
+*          changing
+*            line  = detalhe
+*        ).
+
+* F - SVT - ACPM - 13.06.2017
+      WHEN 'B' .
+
+      WHEN OTHERS .
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD change_info_detalhes_104 .
+
+    DATA:
+      line_reguh TYPE ty_reguh,
+      line_regup TYPE ty_regup,
+      line_bseg  TYPE ty_bseg,
+      rbetr_c    TYPE char13,
+      htype      TYPE datatype_d.
+
+    CASE detalhe+13(1) .
+
+      WHEN 'A' .
+
+        me->get_detail(
+          EXPORTING
+            detalhe = detalhe
+          IMPORTING
+            reguh   = line_reguh
+            regup   = line_regup
+            bseg    = line_bseg
+        ).
+
+        me->get_info_barcode(
+          EXPORTING
+            zbukr   = line_regup-zbukr
+            belnr   = line_regup-belnr
+            gjahr   = line_regup-gjahr
+            buzei   = '001'
+          CHANGING
+            detalhe = detalhe
+        ).
+
+        detalhe+13(1) = 'K' .
+
+*       Retorno de erro
+*       Reg:3 Posição 57,17 deveria ser branco. Encontrado:004853611
         me->space(
-          exporting
-            begin = 231
-            end   = 240
-          changing
+          EXPORTING
+            begin = 57
+            end   = 73
+          CHANGING
             line  = detalhe
         ).
 
-
-      when 'B' .
-
-*       B.10 063 067 9(005) Número no local
-        write detalhe+62(5)  to detalhe+62(5) .
-        unpack detalhe+62(5) to detalhe+62(5) .
-
-        translate detalhe+62(5) using ' 0' .
-
-        zcl_fi_pgto_concessionarias=>preencher_espaco(
-          exporting
-            caracter_inicial = 226
-            caracter_final   = 240
-          changing
+*       Filler
+        me->preencher_espaco(
+          EXPORTING
+            caracter_inicial = 80
+            caracter_final   = 92
+          CHANGING
             detalhe          = detalhe
         ).
 
-      when others .
+        me->get_detail(
+          EXPORTING
+            detalhe = detalhe
+          IMPORTING
+            reguh   = line_reguh
+            regup   = line_regup
+            bseg    = line_bseg
+        ).
 
-    endcase.
+*       A.20 102 104 X(003) Tipo da moeda
+*       detalhe+101(3)
 
-  endmethod.
+*       A.19 094 101 9(008) Data Vencimento
+        me->date(
+          EXPORTING
+            date      = line_bseg-zfbdt
+          IMPORTING
+            date_file = detalhe+93(8)
+        ).
 
-  method change_info_fim.
+*       A.21 105 119 9(010)V99999 Quantidade de moeda
 
-    if fim is not initial .
-
-      case fim(3) .
-
-        when c_santander .
-
-        when c_itau .
-
-        when c_caixa .
-
-*         9.08 036 240 X(205) Uso exclusivo FEBRABAN
-          me->space(
-            exporting
-              begin = 036
-              end   = 240
-            changing
-              line  = fim
-          ).
-
-        when others .
-
-      endcase.
-
-    endif .
-
-  endmethod.
-
-  method change_info_rodape .
-
-    if rodape is not initial .
-
-      case rodape(3) .
-
-        when c_santander .
-
-        when c_itau .
-
-        when c_caixa .
-
-*         Número aviso débito
-          unpack '0' to rodape+59(6) .
-
-*         5.09 066 230 X(165) Uso exclusivo FEBRABAN-2
-          me->space(
-            exporting
-              begin = 066
-              end   = 230
-            changing
-              line  = rodape
-          ).
-
-*         5.10 231 240 X(010) Ocorrências
-          me->space(
-            exporting
-              begin = 231
-              end   = 240
-            changing
-              line  = rodape
-          ).
-
-        when others .
-
-      endcase.
-
-    endif .
+*       A.22 120 134 9(013)V99 Valor Lançamento
 
 
-  endmethod.
+**       Data de Vencimento
+*        detalhe+95(2)     = line_bseg-zfbdt+6(2).
+*        detalhe+97(2)     = line_bseg-zfbdt+4(2).
+*        detalhe+99(4)     = line_bseg-zfbdt(4).
+*        detalhe+103(3)    = 'REA'.
+*        clear detalhe+106(15).
+*
+*       Número do documento banco
+        UNPACK '0' TO detalhe+134(8) .
 
-  method change_inicio.
+        UNPACK rbetr_c      TO detalhe+121(15) .
+        detalhe+136(2)    = line_reguh-laufd+6(2).
+        detalhe+138(2)    = line_reguh-laufd+4(2).
+        detalhe+140(4)    = line_reguh-laufd(4).
 
-    if inicio is not initial .
+*       Reg:3 Posição 144,11 deveria ser branco. Encontrado:70000010000
+*       A.24 144 146 X(003) Filler
+*       A.25 147 148 9(002) Quantidade de Parcelas
+        me->space(
+          EXPORTING
+            begin = 144
+            end   = 154
+          CHANGING
+            line  = detalhe
+        ).
 
-      case inicio(3) .
+*       A.30 155 162 9(008) Data da Efetivação
+*        me->date(
+*          exporting
+*            date      = line_bseg-zfbdt
+*          importing
+*           date_file = detalhe+154(8)
+*        ).
+        UNPACK '0' TO detalhe+154(8) .
 
-        when c_santander .
+*        A.31 163 177 9(013) V99 Valor Real Efetivado
+        detalhe+163(13) = rbetr_c .
+        UNPACK detalhe+163(13) TO detalhe+163(13) .
 
-        when c_itau .
+*        move line_reguh-rbetr to rbetr_c .
+*        unpack rbetr_c        to detalhe+144(15).
+*
+**       Indicador de forma de parcelamento
+*        detalhe+149(1)    = '1' .
+*
+**       Número parcela
+*        detalhe+152(2)    = '00' .
 
-        when c_caixa .
+*       clear detalhe+159(15).
 
-**        Versão do leiaute do lote
-          me->space(
-            exporting
-              begin = 43
-              end   = 45
-            changing
+        UNPACK line_regup-belnr TO detalhe+174(20).
+
+        UNPACK '0'              TO detalhe+195(45).
+
+**      Finalidade DOC
+*       detalhe+217(2)    = '07' .
+
+*       A.33 218 219 9(002) Finalidade DOC
+        me->space(
+          EXPORTING
+            begin = 218
+            end   = 219
+          CHANGING
+            line  = detalhe
+        ).
+
+*       A.34 220 229 X(010) Uso FEBRABAN
+        me->space(
+          EXPORTING
+            begin = 220
+            end   = 229
+          CHANGING
+            line  = detalhe
+        ).
+
+*       Reg:3 Posição 231,10 deveria ser branco. Encontrado:0000000000
+        me->space(
+          EXPORTING
+            begin = 231
+            end   = 240
+          CHANGING
+            line  = detalhe
+        ).
+
+      WHEN 'B' .
+
+*       B.10 063 067 9(005) Número no local
+        CALL FUNCTION 'NUMERIC_CHECK'
+          EXPORTING
+            string_in = detalhe+62(5)
+          IMPORTING
+*           string_out =
+            htype     = htype.
+
+        IF htype EQ 'NUMC' .
+          UNPACK detalhe+62(5) TO detalhe+62(5) .
+        ELSE .
+          UNPACK '0' TO detalhe+62(5) .
+        ENDIF .
+
+
+*       A.30 155 162 9(008) Data da Efetivação
+        me->space(
+          EXPORTING
+            begin = 155
+            end   = 162
+          CHANGING
+            line  = detalhe
+        ).
+
+        UNPACK '0' TO detalhe+135(75) .
+
+        me->preencher_espaco(
+          EXPORTING
+            caracter_inicial = 226
+            caracter_final   = 240
+          CHANGING
+            detalhe          = detalhe
+        ).
+
+      WHEN OTHERS .
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD change_info_detalhes_341 .
+
+    DATA:
+      line_reguh TYPE ty_reguh,
+      line_regup TYPE ty_regup,
+      line_bseg  TYPE ty_bseg,
+      rbetr_c    TYPE char13.
+
+    CASE detalhe+13(1) .
+
+      WHEN 'A'.
+
+        me->get_detail(
+          EXPORTING
+            detalhe = detalhe
+          IMPORTING
+            reguh   = line_reguh
+            regup   = line_regup
+            bseg    = line_bseg
+        ).
+* I - SVT - LAPM - 04.07.2017 - CH8568
+* Modificar seleção
+
+        me->get_info_barcode(
+          EXPORTING
+            zbukr   = line_regup-zbukr
+            belnr   = line_regup-belnr
+            gjahr   = line_regup-gjahr
+            buzei   = '001'
+          CHANGING
+            detalhe = detalhe
+        ).
+* F - SVT - LAPM - 04.07.2017 - CH8568
+
+        detalhe+65(30) = line_reguh-name1.
+*       vblnr          = line_regup-vblnr.
+*       zfbdt+6(2)     = line_bseg-zfbdt+6(2) + line_bseg-zbd1t.
+
+*       Data de Vencimento
+        detalhe+95(2)     = line_bseg-zfbdt+6(2).
+        detalhe+97(2)     = line_bseg-zfbdt+4(2).
+        detalhe+99(4)     = line_bseg-zfbdt(4).
+        detalhe+103(3)    = 'REA'.
+
+        CLEAR detalhe+106(15).
+
+        MOVE line_reguh-rbetr TO rbetr_c .
+
+        UNPACK rbetr_c      TO detalhe+121(15) .
+        detalhe+136(2)    = line_reguh-laufd+6(2).
+        detalhe+138(2)    = line_reguh-laufd+4(2).
+        detalhe+140(4)    = line_reguh-laufd(4).
+
+        UNPACK rbetr_c TO detalhe+144(15).
+
+        CLEAR detalhe+159(15).
+
+        UNPACK line_regup-belnr TO detalhe+174(20).
+
+        UNPACK '0' TO detalhe+195(45).
+
+      WHEN 'B' .
+
+      WHEN OTHERS .
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD change_info_detalhes_others .
+
+    DATA:
+      line_reguh TYPE ty_reguh,
+      line_regup TYPE ty_regup,
+      line_bseg  TYPE ty_bseg,
+      rbetr_c    TYPE char13.
+
+    CASE detalhe+13(1) .
+
+      WHEN 'A' .
+
+        me->get_detail(
+          EXPORTING
+            detalhe = detalhe
+          IMPORTING
+            reguh   = line_reguh
+            regup   = line_regup
+            bseg    = line_bseg
+        ).
+
+        me->get_info_barcode(
+          EXPORTING
+            zbukr   = line_regup-zbukr
+            belnr   = line_regup-belnr
+            gjahr   = line_regup-gjahr
+            buzei   = '001'
+          CHANGING
+            detalhe = detalhe
+        ).
+
+
+      WHEN 'B' .
+
+        me->get_detail(
+          EXPORTING
+            detalhe = detalhe
+          IMPORTING
+            reguh   = line_reguh
+            regup   = line_regup
+            bseg    = line_bseg
+        ).
+
+*       Data de Vencimento
+        detalhe+95(2)     = line_bseg-zfbdt+6(2).
+        detalhe+97(2)     = line_bseg-zfbdt+4(2).
+        detalhe+99(4)     = line_bseg-zfbdt(4).
+        detalhe+103(3)    = 'REA'.
+
+        CLEAR detalhe+106(15).
+
+        MOVE line_reguh-rbetr TO rbetr_c .
+
+        UNPACK rbetr_c      TO detalhe+121(15) .
+        detalhe+136(2)    = line_reguh-laufd+6(2).
+        detalhe+138(2)    = line_reguh-laufd+4(2).
+        detalhe+140(4)    = line_reguh-laufd(4).
+
+        UNPACK rbetr_c        TO detalhe+144(15).
+
+        CLEAR detalhe+159(15).
+
+        UNPACK line_regup-belnr    TO detalhe+174(20).
+
+        UNPACK '0'              TO detalhe+195(45).
+      WHEN OTHERS .
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD change_info_fim.
+
+    DATA: lv_lines_detalhe(6) TYPE n.
+
+    CASE fim(3) .
+
+      WHEN c_santander .
+
+        UNPACK '0' TO fim+35(205).
+
+        " Início - EFP - 22.09.2017 - Chamado 8183
+
+* I - SVT - ACPM - 26.06.2017
+*Trailler
+        "       SUBTRACT 1 FROM fim+28(1).
+* F - SVT - ACPM - 26.06.2017
+
+        " Quantidade total de linhas   Fazer ??/
+        lv_lines_detalhe = lines( detalhe ).
+        ADD 4 TO lv_lines_detalhe. " Header + Trailer + Rodape + fim
+
+        fim+23(6) = lv_lines_detalhe.
+        " Fim    - EFP - 22.09.2017 - Chamado 8183
+
+      WHEN c_caixa .
+
+        me->space(
+          EXPORTING
+            begin = 36
+            end   = 240
+          CHANGING
+            line  = fim
+        ).
+
+      WHEN c_itau .
+
+        UNPACK '0' TO fim+35(205).
+
+      WHEN c_banco_brasil .
+
+        UNPACK '0' TO fim+35(205).
+
+      WHEN OTHERS .
+
+        UNPACK '0' TO fim+35(205).
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD change_info_rodape .
+
+    DATA:
+      change              TYPE ty_detalhe,
+      total               TYPE c LENGTH 18,
+* I - LAPM - 22/09/2017 - CH8183
+      lv_lines_detalhe(6) TYPE n.
+* F - LAPM - 22/09/2017 - CH81/83
+
+    CASE rodape(3) .
+
+      WHEN c_santander .
+
+        change = rodape .
+
+* I - SVT - ACPM - 26.06.2017
+
+*       Número Aviso de Débito 060 065 9(006) Nota G020
+        UNPACK '0' TO change+59(6) .
+
+
+
+* I - SVT - LAPM - 11.10.2017 - CH8183
+* Campo Filler
+
+*        UNPACK '0' TO change+65(174) .
+*
+*        me->preencher_espaco(
+*          EXPORTING
+*            caracter_inicial = 231
+*            caracter_final   = 240
+*          CHANGING
+*            detalhe          = change
+*        ).
+
+        me->preencher_espaco(
+          EXPORTING
+            caracter_inicial = 66
+            caracter_final   = 240
+          CHANGING
+            detalhe          = change
+        ).
+
+* F - LAPM - 22/09/2017 - CH8183
+
+        rodape = change .
+
+*Trailler
+
+* I - LAPM - 22/09/2017 - CH8183
+* Quantidade total de linhas do segmento
+
+*        SUBTRACT 1 FROM rodape+22(1).
+
+        lv_lines_detalhe = lines( detalhe ).
+        ADD 2 TO lv_lines_detalhe. " Header + Trailer
+
+        rodape+17(6) = lv_lines_detalhe.
+* F - LAPM - 22/09/2017 - CH8183
+
+
+* F - SVT - ACPM - 26.06.2017
+
+      WHEN c_itau .
+
+        rodape+41(18)           = rodape+23(18).
+        UNPACK '0'                TO rodape+59(181).
+
+
+      WHEN c_caixa .
+
+*       Reg:5 TRAILLER LOTE Posição 66,175 deveria ser branco.
+        me->space(
+          EXPORTING
+            begin = 66
+            end   = 240
+          CHANGING
+            line  = rodape
+        ).
+
+
+*      when c_santander .
+*
+**       Número Aviso de Débito 060 065 9(006)
+*        unpack '0' to rodape+59(6) .
+*
+**       Filler 066 230 X(165)
+*        me->space(
+*          exporting
+*            begin = 66
+*            end   = 230
+*          changing
+*            line  = rodape
+*        ).
+
+      WHEN OTHERS .
+
+        rodape+41(18)           = rodape+23(18).
+        UNPACK '0'                TO rodape+59(181).
+
+
+    ENDCASE.
+
+
+  ENDMETHOD.
+
+
+  METHOD change_inicio.
+
+    DATA: change TYPE ty_detalhe.
+
+    IF inicio IS NOT INITIAL .
+
+      CASE inicio(3) .
+
+        WHEN c_santander .
+
+* I - SVT - LAPM - 8183 - 11/12/2017
+
+*          UNPACK '0' TO inicio+201(39).
+           UNPACK '0' TO inicio+201(10).
+
+*         " posição 212 a 230 em branco
+
+         change = inicio.
+
+         me->preencher_espaco(
+          EXPORTING
+            caracter_inicial = 212
+            caracter_final   = 231
+          CHANGING
+            detalhe          = change
+         ).
+
+          inicio = change.
+
+          UNPACK '0' TO inicio+230(10).
+
+* F - SVT - LAPM - 8183 - 11/12/2017
+
+        WHEN c_caixa .
+
+          space(
+            EXPORTING
+              begin = 42
+              end   = 42
+            CHANGING
               line  = inicio
           ).
 
-          inicio+45(4) = '0000' .
+          me->space(
+            EXPORTING
+              begin = 43
+              end   = 45
+            CHANGING
+              line  = inicio
+          ).
 
-*         Número da conta
-*         Pos 59 a 70 – Número da conta: Preencher conforme detalhamento do item 0.16
-          inicio+58(4) = '0003' .
+          UNPACK '0' TO  inicio+45(4) .
 
-          unpack '0' to inicio+201(39).
+          me->get_conta_corrente_104(
+            IMPORTING
+              conta  = inicio+58(12)
+*             digito =
+          ).
+
+*         0.17    71  71  1   DV da conta (5)
+          inicio+70(1) = '5' .
+*         0.18    72  72  1   DV da agência/conta (8)
+*         inicio+71(1) = '8' .
+          inicio+71(1) = ' ' .
+
+
+          UNPACK '0' TO inicio+201(39).
 *         Versão do layout do arquivo
           inicio+163(3) = '080' .
 
 *         Densidade de gravação
           inicio+166(5) = '01600' .
 
-*         0.30 Uso exclusivo FEBRABAN
           me->space(
-            exporting
+            EXPORTING
               begin = 212
-              end   = 222
-            changing
+              end   = 225
+            CHANGING
               line  = inicio
           ).
 
-*         0.31 Ident. Cobrança
           me->space(
-            exporting
-              begin = 223
-              end   = 225
-            changing
+            EXPORTING
+              begin = 229
+              end   = 240
+            CHANGING
               line  = inicio
           ).
 
 *         Uso exclusivo das VAN
           inicio+225(3) = '000' .
 
-*         0.33 Tipo de serviço
-          me->space(
-            exporting
-              begin = 229
-              end   = 230
-            changing
-              line  = inicio
-          ).
 
-*         0.34 Ocorrência Cob. Sem papel
-          me->space(
-            exporting
-              begin = 231
-              end   = 240
-            changing
-              line  = inicio
-          ).
+        WHEN c_itau .
 
-        when c_banco_brasil .
+          UNPACK '0' TO inicio+201(39).
 
-        when others .
+        WHEN c_banco_brasil .
 
-      endcase.
+          inicio+45(7) = '       ' .
 
-    endif .
+          UNPACK '0' TO inicio+201(39).
 
-  endmethod.
+        WHEN OTHERS .
 
-  method check_cenario.
+          UNPACK '0' TO inicio+201(39).
 
-    case inicio(3) .
+      ENDCASE.
 
-      when c_caixa .
-        error = abap_off .
+    ENDIF .
 
-      when others .
-        error = abap_on .
 
-    endcase .
-  endmethod.
+  ENDMETHOD.
 
-  method get_bank_104.
 
-    select acc_id, banks, bankl, acc_num, acc_type_id, valid_from, valid_to, control_key
-     up to 1 rows
-      from fclm_bam_amd
-      into @data(line)
-     where acc_type_id eq 'CX01'
-       and valid_from le @sy-datum
-       and valid_to   ge @sy-datum .
-    endselect .
+  METHOD check_file.
 
-    if sy-subrc eq 0 .
+    DATA:lw_inicio    TYPE char1000sf,
+         lw_cabecalho TYPE bu_txt10000,
+         lt_detalhe   TYPE TABLE OF bu_txt10000,
+         lw_detalhe   TYPE bu_txt10000,
+         lw_rodape    TYPE char1000sf,
+         lw_fim       TYPE char1000sf,
+         lv_filename  TYPE string,
+         lt_arquivo   TYPE tab_arquivo,
+         lt_reguh     TYPE tab_reguh,
+         lw_reguh     TYPE ty_reguh.
 
-      try .
+    lv_filename = i_filename.
+    lt_reguh[]  = t_reguh[].
 
-          banco   = line-bankl(3) .
-          agencia = line-bankl+4 .
-          conta   = line-acc_num .
-          unpack conta to conta .
+    CALL FUNCTION 'GUI_UPLOAD'
+      EXPORTING
+        filename = lv_filename
+        filetype = 'ASC'
+      TABLES
+        data_tab = lt_arquivo.
 
-          digito_agencia  = line-control_key(1) .
-          digito_conta    = line-control_key+1(1) .
+    t_arquivo[] = lt_arquivo[].
 
-        catch cx_sy_range_out_of_bounds .
-
-      endtry.
-
-    endif .
-
-  endmethod.
-
-method get_bank_client.
-
-    data:
-      line_bseg type ty_bseg .
-
-    me->get_detail(
-      exporting
-        detalhe = detalhe
-       importing
-*        reguh   =
-*        regup   =
-         bseg    = line_bseg
+    me->get_info_file(
+     EXPORTING
+     arquivo   = lt_arquivo
+     IMPORTING
+     inicio    = lw_inicio
+     cabecalho = lw_cabecalho
+     t_detalhe = lt_detalhe
+     rodape    = lw_rodape
+     fim       = lw_fim
+     filename  = lv_filename
     ).
 
-    if line_bseg is not initial .
+    CHECK lt_detalhe IS NOT INITIAL.
 
-      read table t_but0bk into data(line)
-        with key partner = line_bseg-lifnr .
+    SORT lt_reguh BY vblnr.
 
-      if sy-subrc eq 0 .
+    e_meio_pagamento = 'CO'. " Concessionaria
 
-        banco   = line-bankl(3) .
-        agencia = line-bankl+4 .
-        conta   = line-bankn .
-        unpack '0' to conta .
+    LOOP AT lt_detalhe INTO lw_detalhe.
 
-      endif .
+* I - LAPM - 21/09/2017 - CH8183
 
-    endif .
+* Para o Santander os segmentos diferentes de A e J são opcionais,
+* portanto não é necessário verificar.
 
-  endmethod.
+      IF lw_detalhe(3) EQ c_santander AND
+         ( lw_detalhe+13(1) NE 'A' AND lw_detalhe+13(1) NE 'J' ).
+        CONTINUE.
+      ENDIF.
+* F - LAPM - 21/09/2017 - CH8183
 
-  method get_data .
+      CLEAR lw_reguh.
+      READ TABLE lt_reguh INTO lw_reguh WITH KEY vblnr = lw_detalhe+73(10)
+                                                 BINARY SEARCH.
 
-    refresh:
-      t_reguh, t_regup .
+      IF lw_reguh-rzawe NE 'F'.  " Valor null também corresponde ao fornecedor
+        e_meio_pagamento = 'FO'. " Fornecedor
+      ENDIF.
 
-    select laufd laufi xvorl zbukr lifnr kunnr
-           empfg vblnr name1 rzawe rbetr augdt ausfd
-      from reguh
-      into table t_reguh
-     where laufd eq regut-laufd
-       and laufi eq regut-laufi
-       and zbukr eq regut-zbukr .
+    ENDLOOP.
 
-    if sy-subrc eq 0 .
+  ENDMETHOD.
 
-      select laufd laufi xvorl zbukr lifnr kunnr empfg vblnr
-             bukrs belnr gjahr buzei zfbdt zbd1t esrnr esrre
-        from regup 
-        into table t_regup
-         for all entries in t_reguh
-       where laufi eq regut-laufi
-         and laufd eq regut-laufd
-         and zbukr eq regut-zbukr
-         and vblnr eq t_reguh-vblnr.
 
-      if sy-subrc eq 0 .
+  METHOD constructor .
 
-        sort t_reguh by rzawe descending .
+    caracter_space = cl_abap_conv_in_ce=>uccp( '00a0' ) .
 
-        sort t_regup by zbukr ascending
-                        belnr ascending
-                        gjahr ascending .
+  ENDMETHOD.
 
-        select bukrs belnr gjahr buzei sgtxt fdtag lifnr zfbdt zbd1t
-          from bseg
-          into table t_bseg
-           for all entries in t_regup
-         where bukrs eq t_regup-zbukr
-           and belnr eq t_regup-belnr
-           and gjahr eq t_regup-gjahr .
 
-        if sy-subrc eq 0 .
+  METHOD date .
 
-          select partner taxtype
-            from dfkkbptaxnum
-            into table t_dfkkbptaxnum
-             for all entries in t_bseg
-           where partner eq t_bseg-lifnr .
+    DATA:
+       output TYPE char12 .
 
-          if sy-subrc eq 0 .
-          endif .
+    CALL FUNCTION 'CONVERSION_EXIT_PDATE_OUTPUT'
+      EXPORTING
+        input  = date
+      IMPORTING
+        output = output.
 
-          select partner bkvid banks bankl bankn
-            from but0bk
-            into table t_but0bk
-             for all entries in t_bseg
-           where partner eq t_bseg-lifnr .
+    TRANSLATE output USING '. ' .
+    CONDENSE  output NO-GAPS .
 
-          if sy-subrc eq 0 .
-          endif .
+    date_file = output .
 
-        endif.
+  ENDMETHOD.
 
-      endif.
 
-    endif.
+  METHOD get_conta_corrente_104.
 
-  endmethod.
+    DATA:
+      local_agencia      TYPE char4,
+      local_conta        TYPE char8,
+      local_digito_conta TYPE char1,
+      local_operacao     TYPE char3 VALUE '003'.
 
-  method get_detail.
+    zcl_fi_pgto_fornecedores=>get_bank_104(
+       IMPORTING
+*        banco          =
+         agencia        = local_agencia
+         conta          = local_conta
+*        sdigito_agencia =
+         digito_conta   = local_digito_conta
+    ).
 
-    read table t_reguh into reguh
-      with key vblnr = detalhe+73(10)
-      binary search.
+*   concatenate local_agencia local_operacao local_conta+3 into conta .
+    CONCATENATE local_operacao '0' local_conta INTO conta .
 
-    if sy-subrc eq 0 .
-    else .
+  ENDMETHOD.
 
-      read table t_reguh into reguh
-        with key vblnr = detalhe+182(10)
-        binary search.
 
-    endif .
+  METHOD get_data.
 
-    if sy-subrc eq 0 .
+    REFRESH: t_reguh, t_regup.
 
-      read table t_regup into regup
-        with key vblnr = reguh-vblnr
-        binary search.
+    SELECT laufd laufi xvorl zbukr lifnr kunnr
+           empfg vblnr name1 rzawe rbetr augdt ausfd rwbtr
+    FROM reguh
+    INTO TABLE t_reguh
+    WHERE laufd EQ regut-laufd
+      AND laufi EQ regut-laufi
+      AND zbukr EQ regut-zbukr.
+*      and xvorl eq space.
 
-      if sy-subrc eq 0 .
+    CHECK sy-subrc EQ 0 .
 
-        read table t_bseg into bseg
-          with key bukrs = regup-zbukr
+    SELECT laufd laufi xvorl zbukr lifnr kunnr empfg vblnr
+           bukrs belnr gjahr buzei zfbdt zbd1t esrnr esrre
+    FROM regup INTO TABLE t_regup
+    FOR ALL ENTRIES IN t_reguh
+    WHERE laufi EQ regut-laufi
+      AND laufd EQ regut-laufd
+      AND zbukr EQ regut-zbukr
+*       and xvorl eq space
+      AND vblnr EQ t_reguh-vblnr.
+
+    IF sy-subrc EQ 0 .
+
+      SORT t_reguh BY rzawe DESCENDING .
+
+      SORT t_regup BY zbukr ASCENDING
+                      belnr ASCENDING
+                      gjahr ASCENDING .
+
+      SELECT bukrs belnr gjahr buzei sgtxt fdtag zfbdt zbd1t
+      FROM bseg
+      INTO TABLE t_bseg
+      FOR ALL ENTRIES IN t_regup
+      WHERE bukrs EQ t_regup-zbukr
+        AND belnr EQ t_regup-belnr
+        AND gjahr EQ t_regup-gjahr .
+
+    ENDIF.
+
+
+
+  ENDMETHOD.
+
+
+  METHOD get_detail .
+
+    READ TABLE t_reguh INTO reguh
+      WITH KEY vblnr = detalhe+73(10)
+      BINARY SEARCH.
+
+    IF sy-subrc EQ 0 .
+    ELSE .
+
+      READ TABLE t_reguh INTO reguh
+        WITH KEY vblnr = detalhe+182(10)
+        BINARY SEARCH.
+
+    ENDIF .
+
+    IF sy-subrc EQ 0 .
+
+      READ TABLE t_regup INTO regup
+        WITH KEY vblnr = reguh-vblnr
+        BINARY SEARCH.
+
+      IF sy-subrc EQ 0 .
+
+        READ TABLE t_bseg INTO bseg
+          WITH KEY bukrs = regup-zbukr
                    belnr = regup-belnr
                    gjahr = regup-gjahr
-          binary search.
-      endif.
-    endif.
+          BINARY SEARCH.
 
-  endmethod.
+        IF sy-subrc EQ 0 .
+        ENDIF.
 
-  method get_info_file .
+      ENDIF.
 
-    data:
-      detalhe like line of t_detalhe .
+    ENDIF.
+
+  ENDMETHOD.
 
 
-    loop at arquivo into data(line) .
+  METHOD get_info_barcode .
 
-      case line+3(5) .
+    DATA: name TYPE tdobname,
+          line TYPE tdline.
 
-        when '00000' .
-          move line to inicio.
+    CONCATENATE zbukr belnr gjahr buzei INTO name.
 
-        when '00011' .
-          move line to cabecalho.
-
-        when '00013' .
-          move line to detalhe.
-          append detalhe to t_detalhe .
-          clear  detalhe.
-
-        when '00015'.
-          move line to rodape.
-
-        when '99999'.
-          move line to fim.
-
-        when others .
-
-      endcase.
-
-    endloop.
-
-  endmethod .
-
-  method get_pf_pj.
-
-    data:
-      line_bseg type ty_bseg .
-
-    me->get_detail(
-      exporting
-        detalhe = detalhe
-       importing
-*        reguh   =
-*        regup   =
-         bseg    = line_bseg
+    me->get_info_text(
+      EXPORTING
+        id       = '0001'
+*       language = 'P'
+        name     = name
+        object   = 'DOC_ITEM'
+      IMPORTING
+        tdline   = line
     ).
 
-    if line_bseg is not initial .
+* I - SVT - LAPM - 04.07.2017 - CH8568
+* Gerar o Seguimento O para todos os requistros
 
-      read table t_dfkkbptaxnum into data(line)
-        with key partner = line_bseg-lifnr .
+    detalhe+13(1) = 'O'.
+    UNPACK '0' TO detalhe+14(3).
+* F - SVT - LAPM - 04.07.2017 - CH8568
 
-      if sy-subrc eq 0 .
+    DATA(lenght) = strlen( line ).
 
-        if line-taxtype eq 'BR1' .
-          value = '003' .
-        else .
-          value = '001' .
-        endif .
+    IF lenght EQ 0.
 
-      endif .
+* I - SVT - LAPM - 04.07.2017 - CH8568
+      detalhe+17(44) = space. " Código de Barra
 
-    else .
+* F - SVT - LAPM - 04.07.2017 - CH8568
+    ELSE.
 
-      value = '003' .
-      exit .
+      CASE lenght.
 
-    endif .
+        WHEN 43 .
+*         Se o codigo de barras tiver 43 posições
+          detalhe+17(43)  = line .
 
-  endmethod.
+        WHEN OTHERS.
+* Se o codigo de barras tiver 48 posições
 
-  method set_info_file .
+* I - SVT - LAPM - 04.07.2017 - CH8568
+*          detalhe+13(1) = 'O'.
+*          UNPACK '0' TO detalhe+14(3).
+* F - SVT - LAPM - 04.07.2017 - CH8568
 
-    data:
-      arquivo type ty_arquivo .
+* I - SVT - ACPM - 06.07.2017 - CH8183
+          line+47(1) = space.
+          line+11(1) = space.
+          line+23(1) = space.
+          line+35(1) = space.
+          CONDENSE line NO-GAPS.
+          detalhe+17(44)  = line .
+* F - SVT - ACPM - 06.07.2017 - CH8183
 
-    refresh:
+          valor = line+36 .
+          UNPACK valor TO valor .
+
+      ENDCASE.
+
+    ENDIF .
+
+  ENDMETHOD .
+
+
+  METHOD get_info_file .
+
+    DATA: detalhe LIKE LINE OF t_detalhe .
+
+    LOOP AT arquivo INTO DATA(line) .
+
+      CASE line+7(1).
+
+        WHEN '0'.
+          MOVE line TO inicio.
+
+        WHEN '1'.
+          MOVE line TO cabecalho.
+
+        WHEN '3'.
+          MOVE line TO detalhe.
+          APPEND detalhe TO t_detalhe.
+          CLEAR  detalhe.
+
+        WHEN '5'.
+          MOVE line TO rodape.
+
+        WHEN '9'.
+          MOVE line TO fim.
+
+      ENDCASE.
+
+    ENDLOOP.
+
+  ENDMETHOD .
+
+
+  METHOD get_info_text.
+
+    DATA: t_lines TYPE TABLE OF tline .
+
+    CALL FUNCTION 'READ_TEXT'
+      EXPORTING
+        id                      = id
+        language                = language
+        name                    = name
+        object                  = object
+      TABLES
+        lines                   = t_lines
+      EXCEPTIONS
+        id                      = 1
+        language                = 2
+        name                    = 3
+        not_found               = 4
+        object                  = 5
+        reference_check         = 6
+        wrong_access_to_archive = 7
+        OTHERS                  = 8.
+
+    CHECK sy-subrc EQ 0.
+
+    READ TABLE t_lines INTO DATA(line) INDEX 1.
+
+    IF sy-subrc EQ 0 .
+      tdline = line-tdline .
+    ENDIF .
+
+  ENDMETHOD .
+
+
+  METHOD preencher_espaco .
+
+    DATA:
+      contador TYPE i .
+
+    contador = caracter_inicial - 1 .
+
+    IF caracter_inicial LE caracter_final .
+
+      DO .
+
+        IF contador EQ caracter_final .
+          EXIT .
+        ENDIF .
+
+        detalhe+contador(1) = caracter_space .
+
+        contador = contador + 1 .
+
+      ENDDO .
+
+    ENDIF.
+
+  ENDMETHOD .
+
+
+  METHOD set_info_file .
+
+    DATA:
+      arquivo TYPE ty_arquivo .
+
+    REFRESH:
       t_arquivo .
 
-    move   inicio  to arquivo .
-    append arquivo to t_arquivo .
-    clear  arquivo .
+    MOVE   inicio  TO arquivo .
+    APPEND arquivo TO t_arquivo .
+    CLEAR  arquivo .
 
-    move   cabecalho to arquivo .
-    append arquivo to t_arquivo .
-    clear  arquivo .
+    MOVE   cabecalho TO arquivo .
+    APPEND arquivo TO t_arquivo .
+    CLEAR  arquivo .
 
-    loop at t_detalhe into data(detalhe) .
-      move   detalhe to arquivo .
-      append arquivo to t_arquivo .
-      clear  arquivo .
-    endloop.
+    LOOP AT t_detalhe INTO DATA(detalhe) .
+      MOVE   detalhe TO arquivo .
+      APPEND arquivo TO t_arquivo .
+      CLEAR  arquivo .
+    ENDLOOP.
 
-    move   rodape  to arquivo.
-    append arquivo to t_arquivo .
-    clear  arquivo .
+    MOVE   rodape  TO arquivo.
+    APPEND arquivo TO t_arquivo .
+    CLEAR  arquivo .
 
-    move   fim     to arquivo.
-    append arquivo to t_arquivo .
-    clear  arquivo .
+    MOVE   fim     TO arquivo.
+    APPEND arquivo TO t_arquivo .
+    CLEAR  arquivo .
 
-  endmethod .
+  ENDMETHOD .
 
-  method space .
 
-    data:
-       change type zcl_fi_pgto_concessionarias=>ty_detalhe .
+  METHOD space .
 
-    if begin gt end .
-      exit .
-    endif .
+    DATA:
+       change TYPE zcl_fi_pgto_concessionarias=>ty_detalhe .
 
-    if strlen( line ) le 10000 .
+    IF begin GT end .
+      EXIT .
+    ENDIF .
+
+    IF strlen( line ) LE 10000 .
 
       change = line .
 
       zcl_fi_pgto_concessionarias=>preencher_espaco(
-        exporting
+        EXPORTING
           caracter_inicial = begin
           caracter_final   = end
-        changing
+        CHANGING
           detalhe          = change
       ).
 
       line = change .
 
-    endif .
+    ENDIF .
 
-  endmethod.
+  ENDMETHOD.
   
-endclass .
+ENDCLASS.
