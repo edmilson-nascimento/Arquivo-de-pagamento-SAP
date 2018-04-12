@@ -3,104 +3,105 @@ class zcl_fi_pgto_concessionarias definition
   final
   create public .
 
-public section.
+  public section.
 
-  types:
-    begin of ty_reguh,
-        laufd type reguh-laufd,
-        laufi type reguh-laufi,
-        xvorl type reguh-xvorl,
-        zbukr type reguh-zbukr,
-        lifnr type reguh-lifnr,
-        kunnr type reguh-kunnr,
-        empfg type reguh-empfg,
-        vblnr type reguh-vblnr,
-        name1 type reguh-name1,
-        rzawe type reguh-rzawe,
-        rbetr type reguh-rbetr,
-        augdt type reguh-augdt,
-        ausfd type reguh-ausfd,
-        rwbtr type reguh-rwbtr,
-      end of ty_reguh .
-  types:
-    begin of ty_regup,
-        laufd type regup-laufd,
-        laufi type regup-laufi,
-        xvorl type regup-xvorl,
-        zbukr type regup-zbukr,
-        lifnr type regup-lifnr,
-        kunnr type regup-kunnr,
-        empfg type regup-empfg,
-        vblnr type regup-vblnr,
-        bukrs type regup-bukrs,
-        belnr type regup-belnr,
-        gjahr type regup-gjahr,
-        buzei type regup-buzei,
-        zfbdt type regup-zfbdt,
-        zbd1t type regup-zbd1t,
-        esrnr type regup-esrnr,
-        esrre type regup-esrre,
-      end of ty_regup .
-  types:
-    begin of ty_bseg,
-        bukrs type bseg-bukrs,
-        belnr type bseg-belnr,
-        gjahr type bseg-gjahr,
-        buzei type bseg-buzei,
-        sgtxt type bseg-sgtxt,
-        fdtag type bseg-fdtag,
-        zfbdt type bseg-zfbdt,
-        zbd1t type bseg-zbd1t,
-      end of ty_bseg,
-    ty_arquivo  type bu_txt10000,
-    ty_detalhe  type bu_txt10000,
-    tab_regup   type table of ty_regup,
-    tab_reguh   type table of ty_reguh,
-    tab_bseg    type table of ty_bseg,
-    tab_arquivo type table of bu_txt10000,
-    tab_detalhe type table of ty_detalhe .
+    types:
+      begin of ty_reguh,
+          laufd type reguh-laufd,
+          laufi type reguh-laufi,
+          xvorl type reguh-xvorl,
+          zbukr type reguh-zbukr,
+          lifnr type reguh-lifnr,
+          kunnr type reguh-kunnr,
+          empfg type reguh-empfg,
+          vblnr type reguh-vblnr,
+          name1 type reguh-name1,
+          rzawe type reguh-rzawe,
+          rbetr type reguh-rbetr,
+          augdt type reguh-augdt,
+          ausfd type reguh-ausfd,
+          rwbtr type reguh-rwbtr,
+        end of ty_reguh .
+    types:
+      begin of ty_regup,
+          laufd type regup-laufd,
+          laufi type regup-laufi,
+          xvorl type regup-xvorl,
+          zbukr type regup-zbukr,
+          lifnr type regup-lifnr,
+          kunnr type regup-kunnr,
+          empfg type regup-empfg,
+          vblnr type regup-vblnr,
+          bukrs type regup-bukrs,
+          belnr type regup-belnr,
+          gjahr type regup-gjahr,
+          buzei type regup-buzei,
+          zfbdt type regup-zfbdt,
+          zbd1t type regup-zbd1t,
+          esrnr type regup-esrnr,
+          esrre type regup-esrre,
+        end of ty_regup .
+    types:
+      begin of ty_bseg,
+          bukrs type bseg-bukrs,
+          belnr type bseg-belnr,
+          gjahr type bseg-gjahr,
+          buzei type bseg-buzei,
+          sgtxt type bseg-sgtxt,
+          fdtag type bseg-fdtag,
+          zfbdt type bseg-zfbdt,
+          zbd1t type bseg-zbd1t,
+        end of ty_bseg,
+      ty_arquivo  type bu_txt10000,
+      ty_detalhe  type bu_txt10000,
+      tab_regup   type table of ty_regup,
+      tab_reguh   type table of ty_reguh,
+      tab_bseg    type table of ty_bseg,
+      tab_arquivo type table of bu_txt10000,
+      tab_detalhe type table of ty_detalhe .
 
-  methods constructor .
-  methods get_data
-    importing
-      !regut type regut .
-  methods change_file
-    importing
-      !i_filename type rlgrap-filename
-      !t_file type tab_arquivo .
-  class-methods preencher_espaco
-    importing
-      !caracter_inicial type i
-      !caracter_final type i
-    changing
-      !detalhe type ty_detalhe .
-  class-methods date
-    importing
-      !date type sydatum
-    exporting
-      !date_file type char8 .
-  methods check_file
-    importing
-      !i_filename type rlgrap-filename
-    exporting
-      !t_arquivo type tab_arquivo
-      !e_meio_pagamento type char2 .
+    methods constructor .
+    methods get_data
+      importing
+        !regut type regut .
+    methods change_file
+      importing
+        !i_filename type rlgrap-filename
+        !t_file type tab_arquivo .
+    class-methods preencher_espaco
+      importing
+        !caracter_inicial type i
+        !caracter_final type i
+      changing
+        !detalhe type ty_detalhe .
+    class-methods date
+      importing
+        !date type sydatum
+      exporting
+        !date_file type char8 .
+    methods check_file
+      importing
+        !i_filename type rlgrap-filename
+      exporting
+        !t_arquivo type tab_arquivo
+        !e_meio_pagamento type char2 .
+
   protected section.
 
-private section.
+  private section.
 
-  constants:
-    c_santander    type c length 3 value '033' ##no_text.
-  constants:
-    c_caixa        type c length 3 value '104' ##no_text.
-  constants:
-    c_itau         type c length 3 value '341' ##no_text.
-  constants:
-    c_banco_brasil type c length 3 value '001' ##no_text.
-  class-data t_reguh type tab_reguh .
-  class-data t_regup type tab_regup .
-  class-data t_bseg type tab_bseg .
-  class-data caracter_space type c .
+    constants:
+      c_santander    type c length 3 value '033' ##no_text.
+    constants:
+      c_caixa        type c length 3 value '104' ##no_text.
+    constants:
+      c_itau         type c length 3 value '341' ##no_text.
+    constants:
+      c_banco_brasil type c length 3 value '001' ##no_text.
+    class-data t_reguh type tab_reguh .
+    class-data t_regup type tab_regup .
+    class-data t_bseg type tab_bseg .
+    class-data caracter_space type c .
 
   methods get_info_file
     importing
