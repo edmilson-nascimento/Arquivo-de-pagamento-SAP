@@ -716,13 +716,10 @@ class zcl_fi_pgto_concessionarias implementation.
 
 *       nome concessionária
         detalhe+61(30) = line_reguh-name1.
-
-
 *       código de barras
         move detalhe+17(44) to l_codigo.
         clear detalhe+17(44).
         write l_codigo to detalhe+17(44) right-justified.
-
 *       data de vencimento
         concatenate line_reguh-augdt+6(2) line_reguh-augdt+4(2) line_reguh-augdt(4)
                into detalhe+91(8).
@@ -730,142 +727,21 @@ class zcl_fi_pgto_concessionarias implementation.
         concatenate line_reguh-ausfd+6(2) line_reguh-ausfd+4(2) line_reguh-ausfd(4)
                into detalhe+99(8).
 
-*valor de pagamento
+*       valor de pagamento
         move line_reguh-rwbtr to l_char.
         move l_char+3(15) to l_valor.
         clear detalhe+107(15).
         write l_valor to detalhe+107(15) right-justified.
 
-* i - svt - lapm - 11.10.2017 - ch8183 -  nº documento cliente , nº documento banco e filler
-
-* nº documento cliente
+*       nº documento cliente
         unpack line_regup-belnr to detalhe+122(20).
 
-* nº documento banco
+*       nº documento banco
         unpack '0' to detalhe+142(20).
-
-* filler
-*        detalhe+162(67) = space.
         clear detalhe+163(67).
-
-* f - svt - lapm - 11.10.2017 - ch8183
-
-
-* f - svt - acpm - 13.06.2017 - ajustes arquivo santander
-
-* i - svt - acpm - 06.07.2017 - ch8183
         detalhe+231(11) = space.
-* f - svt - acpm - 06.07.2017 - ch8183
 
-
-*        detalhe+11(2) = '11' .
-*
-**       data de vencimento
-*        me->date(
-*          exporting
-*            date      = line_bseg-zfbdt
-*          importing
-*            date_file = detalhe+91(8)
-*        ) .
-*
-**         data de pagamento
-*        me->date(
-*          exporting
-*            date      = line_bseg-fdtag
-*          importing
-*            date_file = detalhe+99(8)
-*        ) .
-*
-**       data do pagamento 094 101 9(008) ddmmaaaa
-*        detalhe+93(8) = detalhe+91(8) .
-*
-**       tipo da moeda 102 104 x(003) nota g005
-*        detalhe+101(3) = 'brl' .
-*
-**       quantidade de moeda 105 119 9(010)v5 zeros
-*        me->space(
-*          exporting
-*            begin = 105
-*            end   = 119
-*          changing
-*            line  = detalhe
-*        ).
-*
-**       filter
-*        me->preencher_espaco(
-*          exporting
-*            caracter_inicial = 163
-**           caracter_final   = 230
-*            caracter_final   = 220
-*          changing
-*            detalhe          = detalhe
-*        ).
-*
-**       finalidade de ted 220 224 x(05) nota g013 b
-*        me->space(
-*          exporting
-*            begin = 220
-*            end   = 224
-*          changing
-*            line  = detalhe
-*        ).
-*
-**       filler 227 229 x(010) brancos
-*        me->space(
-*          exporting
-*            begin = 227
-*            end   = 229
-*          changing
-*            line  = detalhe
-*        ).
-*
-**       emissão de aviso ao favorecido 230 230 x(001) nota g018
-**       detalhe+229(1) = '0' .
-*
-*      when 'b' .
-*
-**       número do local do favorecido 063 067 9(005) opciona
-*        unpack '0' to detalhe+62(5) .
-*
-**       cep do favorecido 118 125 9(008) opcional
-*        unpack '0' to detalhe+117(8) .
-*
-*        clear detalhe+240 .
-*        detalhe+210(4)  = sy-uzeit(4) .
-*        detalhe+214(10) = '          ' .
-*        detalhe+225(4)  = '0000' .
-*
-*        detalhe+229(1)  = '0' .
-*
-**       filler 231 231 x(001 ) nota g007
-*        me->space(
-*          exporting
-*            begin = 231
-*            end   = 231
-*          changing
-*            line  = detalhe
-*        ).
-*
-**       ted para instituição financeira 232 232 x(001) nota g029
-*        me->space(
-*          exporting
-*            begin = 232
-*            end   = 232
-*          changing
-*            line  = detalhe
-*        ).
-*
-**       identificação da if no spb 233 240 x(008) nota g030
-*        me->space(
-*          exporting
-*            begin = 233
-*            end   = 240
-*          changing
-*            line  = detalhe
-*        ).
-
-* f - svt - acpm - 13.06.2017
-      when 'b' .
+      when 'B' .
 
       when others .
 
@@ -885,7 +761,7 @@ class zcl_fi_pgto_concessionarias implementation.
 
     case detalhe+13(1) .
 
-      when 'a' .
+      when 'A' .
 
         me->get_detail(
           exporting
@@ -906,7 +782,7 @@ class zcl_fi_pgto_concessionarias implementation.
             detalhe = detalhe
         ).
 
-        detalhe+13(1) = 'k' .
+        detalhe+13(1) = 'K' .
 
 *       retorno de erro
 *       reg:3 posição 57,17 deveria ser branco. encontrado:004853611
@@ -951,14 +827,6 @@ class zcl_fi_pgto_concessionarias implementation.
 
 *       a.22 120 134 9(013)v99 valor lançamento
 
-
-**       data de vencimento
-*        detalhe+95(2)     = line_bseg-zfbdt+6(2).
-*        detalhe+97(2)     = line_bseg-zfbdt+4(2).
-*        detalhe+99(4)     = line_bseg-zfbdt(4).
-*        detalhe+103(3)    = 'rea'.
-*        clear detalhe+106(15).
-*
 *       número do documento banco
         unpack '0' to detalhe+134(8) .
 
@@ -978,36 +846,13 @@ class zcl_fi_pgto_concessionarias implementation.
             line  = detalhe
         ).
 
-*       a.30 155 162 9(008) data da efetivação
-*        me->date(
-*          exporting
-*            date      = line_bseg-zfbdt
-*          importing
-*           date_file = detalhe+154(8)
-*        ).
         unpack '0' to detalhe+154(8) .
 
 *        a.31 163 177 9(013) v99 valor real efetivado
         detalhe+163(13) = rbetr_c .
-        unpack detalhe+163(13) to detalhe+163(13) .
-
-*        move line_reguh-rbetr to rbetr_c .
-*        unpack rbetr_c        to detalhe+144(15).
-*
-**       indicador de forma de parcelamento
-*        detalhe+149(1)    = '1' .
-*
-**       número parcela
-*        detalhe+152(2)    = '00' .
-
-*       clear detalhe+159(15).
-
+        unpack detalhe+163(13)  to detalhe+163(13) .
         unpack line_regup-belnr to detalhe+174(20).
-
         unpack '0'              to detalhe+195(45).
-
-**      finalidade doc
-*       detalhe+217(2)    = '07' .
 
 *       a.33 218 219 9(002) finalidade doc
         me->space(
@@ -1036,17 +881,17 @@ class zcl_fi_pgto_concessionarias implementation.
             line  = detalhe
         ).
 
-      when 'b' .
+      when 'B' .
 
 *       b.10 063 067 9(005) número no local
-        call function 'numeric_check'
+        call function 'NUMERIC_CHECK'
           exporting
             string_in = detalhe+62(5)
           importing
 *           string_out =
             htype     = htype.
 
-        if htype eq 'numc' .
+        if htype eq 'NUMC' .
           unpack detalhe+62(5) to detalhe+62(5) .
         else .
           unpack '0' to detalhe+62(5) .
@@ -1089,7 +934,7 @@ class zcl_fi_pgto_concessionarias implementation.
 
     case detalhe+13(1) .
 
-      when 'a'.
+      when 'A'.
 
         me->get_detail(
           exporting
@@ -1099,8 +944,6 @@ class zcl_fi_pgto_concessionarias implementation.
             regup   = line_regup
             bseg    = line_bseg
         ).
-* i - svt - lapm - 04.07.2017 - ch8568
-* modificar seleção
 
         me->get_info_barcode(
           exporting
@@ -1111,17 +954,14 @@ class zcl_fi_pgto_concessionarias implementation.
           changing
             detalhe = detalhe
         ).
-* f - svt - lapm - 04.07.2017 - ch8568
 
         detalhe+65(30) = line_reguh-name1.
-*       vblnr          = line_regup-vblnr.
-*       zfbdt+6(2)     = line_bseg-zfbdt+6(2) + line_bseg-zbd1t.
 
 *       data de vencimento
         detalhe+95(2)     = line_bseg-zfbdt+6(2).
         detalhe+97(2)     = line_bseg-zfbdt+4(2).
         detalhe+99(4)     = line_bseg-zfbdt(4).
-        detalhe+103(3)    = 'rea'.
+        detalhe+103(3)    = 'REA'.
 
         clear detalhe+106(15).
 
@@ -1140,7 +980,7 @@ class zcl_fi_pgto_concessionarias implementation.
 
         unpack '0' to detalhe+195(45).
 
-      when 'b' .
+      when 'B' .
 
       when others .
 
@@ -1159,7 +999,7 @@ class zcl_fi_pgto_concessionarias implementation.
 
     case detalhe+13(1) .
 
-      when 'a' .
+      when 'A' .
 
         me->get_detail(
           exporting
