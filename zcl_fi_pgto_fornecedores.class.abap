@@ -1020,7 +1020,6 @@ class zcl_fi_pgto_concessionarias implementation.
             detalhe = detalhe
         ).
 
-
       when 'b' .
 
         me->get_detail(
@@ -1036,7 +1035,7 @@ class zcl_fi_pgto_concessionarias implementation.
         detalhe+95(2)     = line_bseg-zfbdt+6(2).
         detalhe+97(2)     = line_bseg-zfbdt+4(2).
         detalhe+99(4)     = line_bseg-zfbdt(4).
-        detalhe+103(3)    = 'rea'.
+        detalhe+103(3)    = 'REA'.
 
         clear detalhe+106(15).
 
@@ -1054,6 +1053,7 @@ class zcl_fi_pgto_concessionarias implementation.
         unpack line_regup-belnr    to detalhe+174(20).
 
         unpack '0'              to detalhe+195(45).
+
       when others .
 
     endcase.
@@ -1071,19 +1071,11 @@ class zcl_fi_pgto_concessionarias implementation.
 
         unpack '0' to fim+35(205).
 
-        " início - efp - 22.09.2017 - chamado 8183
-
-* i - svt - acpm - 26.06.2017
-*trailler
-        "       subtract 1 from fim+28(1).
-* f - svt - acpm - 26.06.2017
-
         " quantidade total de linhas   fazer ??/
         lv_lines_detalhe = lines( detalhe ).
-        add 4 to lv_lines_detalhe. " header + trailer + rodape + fim
+        add 4 to lv_lines_detalhe . 
 
         fim+23(6) = lv_lines_detalhe.
-        " fim    - efp - 22.09.2017 - chamado 8183
 
       when c_caixa .
 
@@ -1117,35 +1109,15 @@ class zcl_fi_pgto_concessionarias implementation.
     data:
       change              type ty_detalhe,
       total               type c length 18,
-* i - lapm - 22/09/2017 - ch8183
       lv_lines_detalhe(6) type n.
-* f - lapm - 22/09/2017 - ch81/83
 
     case rodape(3) .
 
       when c_santander .
 
         change = rodape .
-
-* i - svt - acpm - 26.06.2017
-
 *       número aviso de débito 060 065 9(006) nota g020
         unpack '0' to change+59(6) .
-
-
-
-* i - svt - lapm - 11.10.2017 - ch8183
-* campo filler
-
-*        unpack '0' to change+65(174) .
-*
-*        me->preencher_espaco(
-*          exporting
-*            caracter_inicial = 231
-*            caracter_final   = 240
-*          changing
-*            detalhe          = change
-*        ).
 
         me->preencher_espaco(
           exporting
@@ -1155,25 +1127,11 @@ class zcl_fi_pgto_concessionarias implementation.
             detalhe          = change
         ).
 
-* f - lapm - 22/09/2017 - ch8183
-
         rodape = change .
-
-*trailler
-
-* i - lapm - 22/09/2017 - ch8183
-* quantidade total de linhas do segmento
-
-*        subtract 1 from rodape+22(1).
 
         lv_lines_detalhe = lines( detalhe ).
         add 2 to lv_lines_detalhe. " header + trailer
-
         rodape+17(6) = lv_lines_detalhe.
-* f - lapm - 22/09/2017 - ch8183
-
-
-* f - svt - acpm - 26.06.2017
 
       when c_itau .
 
@@ -1192,36 +1150,20 @@ class zcl_fi_pgto_concessionarias implementation.
             line  = rodape
         ).
 
-
-*      when c_santander .
-*
-**       número aviso de débito 060 065 9(006)
-*        unpack '0' to rodape+59(6) .
-*
-**       filler 066 230 x(165)
-*        me->space(
-*          exporting
-*            begin = 66
-*            end   = 230
-*          changing
-*            line  = rodape
-*        ).
-
       when others .
 
         rodape+41(18)           = rodape+23(18).
         unpack '0'                to rodape+59(181).
 
-
     endcase.
-
 
   endmethod.
 
 
   method change_inicio.
 
-    data: change type ty_detalhe.
+    data: 
+      change type ty_detalhe.
 
     if inicio is not initial .
 
@@ -1229,28 +1171,21 @@ class zcl_fi_pgto_concessionarias implementation.
 
         when c_santander .
 
-* i - svt - lapm - 8183 - 11/12/2017
+          unpack '0' to inicio+201(10).
 
-*          unpack '0' to inicio+201(39).
-           unpack '0' to inicio+201(10).
+          change = inicio.
 
-*         " posição 212 a 230 em branco
-
-         change = inicio.
-
-         me->preencher_espaco(
-          exporting
-            caracter_inicial = 212
-            caracter_final   = 231
-          changing
-            detalhe          = change
-         ).
+          me->preencher_espaco(
+            exporting
+              caracter_inicial = 212
+              caracter_final   = 231
+            changing
+              detalhe          = change
+          ).
 
           inicio = change.
 
           unpack '0' to inicio+230(10).
-
-* f - svt - lapm - 8183 - 11/12/2017
 
         when c_caixa .
 
@@ -1284,7 +1219,6 @@ class zcl_fi_pgto_concessionarias implementation.
 *         inicio+71(1) = '8' .
           inicio+71(1) = ' ' .
 
-
           unpack '0' to inicio+201(39).
 *         versão do layout do arquivo
           inicio+163(3) = '080' .
@@ -1310,7 +1244,6 @@ class zcl_fi_pgto_concessionarias implementation.
 
 *         uso exclusivo das van
           inicio+225(3) = '000' .
-
 
         when c_itau .
 
