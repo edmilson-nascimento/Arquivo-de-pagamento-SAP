@@ -18,9 +18,9 @@ public section.
         name1 type reguh-name1,
         rzawe type reguh-rzawe,
         rbetr type reguh-rbetr,
-        augdt type reguh-augdt, "svt - acpm - 26.06.2017
-        ausfd type reguh-ausfd, "svt - acpm - 26.06.2017
-        rwbtr type reguh-rwbtr, "svt - acpm - 06.07.2017
+        augdt type reguh-augdt,
+        ausfd type reguh-ausfd,
+        rwbtr type reguh-rwbtr,
       end of ty_reguh .
   types:
     begin of ty_regup,
@@ -51,18 +51,13 @@ public section.
         fdtag type bseg-fdtag,
         zfbdt type bseg-zfbdt,
         zbd1t type bseg-zbd1t,
-      end of ty_bseg .
-  types ty_arquivo type bu_txt10000 .
-  types ty_detalhe type bu_txt10000 .
-  types:
-    tab_regup   type table of ty_regup .
-  types:
-    tab_reguh   type table of ty_reguh .
-  types:
-    tab_bseg    type table of ty_bseg .
-  types:
-    tab_arquivo type table of bu_txt10000 .
-  types:
+      end of ty_bseg,
+    ty_arquivo  type bu_txt10000,
+    ty_detalhe  type bu_txt10000,
+    tab_regup   type table of ty_regup,
+    tab_reguh   type table of ty_reguh,
+    tab_bseg    type table of ty_bseg,
+    tab_arquivo type table of bu_txt10000,
     tab_detalhe type table of ty_detalhe .
 
   methods constructor .
