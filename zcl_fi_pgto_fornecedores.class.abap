@@ -1552,9 +1552,10 @@ class zcl_fi_pgto_concessionarias implementation.
 
   method get_info_text.
 
-    data: t_lines type table of tline .
+    data: 
+      t_lines type table of tline .
 
-    call function 'read_text'
+    call function 'READ_TEXT'
       exporting
         id                      = id
         language                = language
