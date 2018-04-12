@@ -714,50 +714,19 @@ class zcl_fi_pgto_concessionarias implementation.
             detalhe = detalhe
         ).
 
-* nome concessionária
+*       nome concessionária
         detalhe+61(30) = line_reguh-name1.
 
-*       vblnr          = line_regup-vblnr.
-*       zfbdt+6(2)     = line_bseg-zfbdt+6(2) + line_bseg-zbd1t.
 
-* i - svt - lapm - 11.10.2017 - ch8183 - campos comentados
-
-**       data de vencimento
-*        detalhe+95(2)     = line_bseg-zfbdt+6(2).
-*        detalhe+97(2)     = line_bseg-zfbdt+4(2).
-*        detalhe+99(4)     = line_bseg-zfbdt(4).
-*        detalhe+103(3)    = 'rea'.
-
-*        clear detalhe+106(15).
-
-*        move line_reguh-rbetr to rbetr_c .
-
-*        unpack rbetr_c      to detalhe+121(15) .
-*        detalhe+136(2)    = line_reguh-laufd+6(2).
-*        detalhe+138(2)    = line_reguh-laufd+4(2).
-*        detalhe+140(4)    = line_reguh-laufd(4).
-*
-*        unpack rbetr_c        to detalhe+144(15).
-
-*        clear detalhe+159(15).
-
-*        unpack line_regup-belnr to detalhe+174(20).
-*
-*        unpack '0'              to detalhe+195(45).
-
-* f - svt - lapm - 11.10.2017 - ch8183 - campos comentados
-
-* i - svt - acpm - 13.06.2017 - ajustes arquivo santander
-
-*código de barras
+*       código de barras
         move detalhe+17(44) to l_codigo.
         clear detalhe+17(44).
         write l_codigo to detalhe+17(44) right-justified.
 
-*data de vencimento
+*       data de vencimento
         concatenate line_reguh-augdt+6(2) line_reguh-augdt+4(2) line_reguh-augdt(4)
                into detalhe+91(8).
-*data de pagamento
+*       data de pagamento
         concatenate line_reguh-ausfd+6(2) line_reguh-ausfd+4(2) line_reguh-ausfd(4)
                into detalhe+99(8).
 
