@@ -1269,71 +1269,69 @@ class zcl_fi_pgto_concessionarias implementation.
 
   method check_file.
 
-    data:lw_inicio    type char1000sf,
-         lw_cabecalho type bu_txt10000,
-         lt_detalhe   type table of bu_txt10000,
-         lw_detalhe   type bu_txt10000,
-         lw_rodape    type char1000sf,
-         lw_fim       type char1000sf,
-         lv_filename  type string,
-         lt_arquivo   type tab_arquivo,
-         lt_reguh     type tab_reguh,
-         lw_reguh     type ty_reguh.
+    data:
+      lw_inicio    type char1000sf,
+      lw_cabecalho type bu_txt10000,
+      lt_detalhe   type table of bu_txt10000,
+      lw_detalhe   type bu_txt10000,
+      lw_rodape    type char1000sf,
+      lw_fim       type char1000sf,
+      lv_filename  type string,
+      lt_arquivo   type tab_arquivo,
+      lt_reguh     type tab_reguh,
+      lw_reguh     type ty_reguh.
 
-    lv_filename = i_filename.
-    lt_reguh[]  = t_reguh[].
+      lv_filename = i_filename.
+      lt_reguh[]  = t_reguh[].
 
-    call function 'gui_upload'
-      exporting
-        filename = lv_filename
-        filetype = 'asc'
-      tables
-        data_tab = lt_arquivo.
+      call function 'GUI_UPLOAD'
+        exporting
+          filename = lv_filename
+          filetype = 'ASC'
+        tables
+          data_tab = lt_arquivo.
 
-    t_arquivo[] = lt_arquivo[].
+      t_arquivo[] = lt_arquivo[].
 
-    me->get_info_file(
-     exporting
-     arquivo   = lt_arquivo
-     importing
-     inicio    = lw_inicio
-     cabecalho = lw_cabecalho
-     t_detalhe = lt_detalhe
-     rodape    = lw_rodape
-     fim       = lw_fim
-     filename  = lv_filename
-    ).
+      me->get_info_file(
+       exporting
+       arquivo   = lt_arquivo
+       importing
+       inicio    = lw_inicio
+       cabecalho = lw_cabecalho
+       t_detalhe = lt_detalhe
+       rodape    = lw_rodape
+       fim       = lw_fim
+       filename  = lv_filename
+      ).
 
-    check lt_detalhe is not initial.
+      check lt_detalhe is not initial.
 
-    sort lt_reguh by vblnr.
+      sort lt_reguh by vblnr.
 
-    e_meio_pagamento = 'co'. " concessionaria
+      e_meio_pagamento = 'CO'. " concessionaria
 
-    loop at lt_detalhe into lw_detalhe.
+      loop at lt_detalhe into lw_detalhe.
 
-* i - lapm - 21/09/2017 - ch8183
+*       para o santander os segmentos diferentes de a e j são opcionais,
+*       portanto não é necessário verificar.
+        if lw_detalhe(3) eq c_santander and
+           ( lw_detalhe+13(1) ne 'a' and lw_detalhe+13(1) ne 'j' ).
+          continue.
+        endif.
 
-* para o santander os segmentos diferentes de a e j são opcionais,
-* portanto não é necessário verificar.
+        clear lw_reguh.
+        read table lt_reguh into lw_reguh 
+          with key vblnr = lw_detalhe+73(10)
+        binary search .
 
-      if lw_detalhe(3) eq c_santander and
-         ( lw_detalhe+13(1) ne 'a' and lw_detalhe+13(1) ne 'j' ).
-        continue.
-      endif.
-* f - lapm - 21/09/2017 - ch8183
+        if lw_reguh-rzawe ne 'F'.  " valor null também corresponde ao fornecedor
+          e_meio_pagamento = 'FO'. " fornecedor
+        endif.
 
-      clear lw_reguh.
-      read table lt_reguh into lw_reguh with key vblnr = lw_detalhe+73(10)
-                                                 binary search.
+      endloop.
 
-      if lw_reguh-rzawe ne 'f'.  " valor null também corresponde ao fornecedor
-        e_meio_pagamento = 'fo'. " fornecedor
-      endif.
-
-    endloop.
-
-  endmethod.
+    endmethod.
 
 
   method constructor .
@@ -1348,7 +1346,7 @@ class zcl_fi_pgto_concessionarias implementation.
     data:
        output type char12 .
 
-    call function 'conversion_exit_pdate_output'
+    call function 'CONVERSION_EXIT_PDATE_OUTPUT'
       exporting
         input  = date
       importing
@@ -1379,7 +1377,6 @@ class zcl_fi_pgto_concessionarias implementation.
          digito_conta   = local_digito_conta
     ).
 
-*   concatenate local_agencia local_operacao local_conta+3 into conta .
     concatenate local_operacao '0' local_conta into conta .
 
   endmethod.
@@ -1387,28 +1384,28 @@ class zcl_fi_pgto_concessionarias implementation.
 
   method get_data.
 
-    refresh: t_reguh, t_regup.
+    refresh: 
+      t_reguh, t_regup.
 
     select laufd laufi xvorl zbukr lifnr kunnr
            empfg vblnr name1 rzawe rbetr augdt ausfd rwbtr
-    from reguh
-    into table t_reguh
-    where laufd eq regut-laufd
-      and laufi eq regut-laufi
-      and zbukr eq regut-zbukr.
-*      and xvorl eq space.
+      from reguh
+      into table t_reguh
+     where laufd eq regut-laufd
+       and laufi eq regut-laufi
+       and zbukr eq regut-zbukr.
 
     check sy-subrc eq 0 .
 
     select laufd laufi xvorl zbukr lifnr kunnr empfg vblnr
            bukrs belnr gjahr buzei zfbdt zbd1t esrnr esrre
-    from regup into table t_regup
-    for all entries in t_reguh
-    where laufi eq regut-laufi
-      and laufd eq regut-laufd
-      and zbukr eq regut-zbukr
-*       and xvorl eq space
-      and vblnr eq t_reguh-vblnr.
+      from regup 
+      into table t_regup
+       for all entries in t_reguh
+     where laufi eq regut-laufi 
+       and laufd eq regut-laufd
+       and zbukr eq regut-zbukr
+       and vblnr eq t_reguh-vblnr.
 
     if sy-subrc eq 0 .
 
@@ -1419,19 +1416,16 @@ class zcl_fi_pgto_concessionarias implementation.
                       gjahr ascending .
 
       select bukrs belnr gjahr buzei sgtxt fdtag zfbdt zbd1t
-      from bseg
-      into table t_bseg
-      for all entries in t_regup
+       from bseg
+       into table t_bseg
+        for all entries in t_regup
       where bukrs eq t_regup-zbukr
         and belnr eq t_regup-belnr
         and gjahr eq t_regup-gjahr .
 
     endif.
 
-
-
   endmethod.
-
 
   method get_detail .
 
@@ -1444,7 +1438,7 @@ class zcl_fi_pgto_concessionarias implementation.
 
       read table t_reguh into reguh
         with key vblnr = detalhe+182(10)
-        binary search.
+          binary search.
 
     endif .
 
@@ -1452,7 +1446,7 @@ class zcl_fi_pgto_concessionarias implementation.
 
       read table t_regup into regup
         with key vblnr = reguh-vblnr
-        binary search.
+          binary search.
 
       if sy-subrc eq 0 .
 
@@ -1460,7 +1454,7 @@ class zcl_fi_pgto_concessionarias implementation.
           with key bukrs = regup-zbukr
                    belnr = regup-belnr
                    gjahr = regup-gjahr
-          binary search.
+            binary search.
 
         if sy-subrc eq 0 .
         endif.
@@ -1474,8 +1468,9 @@ class zcl_fi_pgto_concessionarias implementation.
 
   method get_info_barcode .
 
-    data: name type tdobname,
-          line type tdline.
+    data: 
+      name type tdobname,
+      line type tdline.
 
     concatenate zbukr belnr gjahr buzei into name.
 
@@ -1489,21 +1484,14 @@ class zcl_fi_pgto_concessionarias implementation.
         tdline   = line
     ).
 
-* i - svt - lapm - 04.07.2017 - ch8568
-* gerar o seguimento o para todos os requistros
-
-    detalhe+13(1) = 'o'.
+*   gerar o seguimento o para todos os requistros
+    detalhe+13(1) = 'O'.
     unpack '0' to detalhe+14(3).
-* f - svt - lapm - 04.07.2017 - ch8568
 
     data(lenght) = strlen( line ).
 
     if lenght eq 0.
-
-* i - svt - lapm - 04.07.2017 - ch8568
       detalhe+17(44) = space. " código de barra
-
-* f - svt - lapm - 04.07.2017 - ch8568
     else.
 
       case lenght.
@@ -1513,22 +1501,12 @@ class zcl_fi_pgto_concessionarias implementation.
           detalhe+17(43)  = line .
 
         when others.
-* se o codigo de barras tiver 48 posições
-
-* i - svt - lapm - 04.07.2017 - ch8568
-*          detalhe+13(1) = 'o'.
-*          unpack '0' to detalhe+14(3).
-* f - svt - lapm - 04.07.2017 - ch8568
-
-* i - svt - acpm - 06.07.2017 - ch8183
           line+47(1) = space.
           line+11(1) = space.
           line+23(1) = space.
           line+35(1) = space.
           condense line no-gaps.
           detalhe+17(44)  = line .
-* f - svt - acpm - 06.07.2017 - ch8183
-
           valor = line+36 .
           unpack valor to valor .
 
@@ -1541,7 +1519,8 @@ class zcl_fi_pgto_concessionarias implementation.
 
   method get_info_file .
 
-    data: detalhe like line of t_detalhe .
+    data: 
+       detalhe like line of t_detalhe .
 
     loop at arquivo into data(line) .
 
