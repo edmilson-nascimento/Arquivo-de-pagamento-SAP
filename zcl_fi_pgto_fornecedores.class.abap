@@ -535,7 +535,7 @@ class zcl_fi_pgto_concessionarias implementation.
 
         when c_banco_brasil .
 
-          if detalhe+13(1) eq 'b' .
+          if detalhe+13(1) eq 'B' .
 
             delete t_detalhe index tabix .
 
@@ -562,11 +562,9 @@ class zcl_fi_pgto_concessionarias implementation.
 
       if len lt 240 . " quantidade de registro por linha
 
-* i - svt - lapm - 04.07.2017 - ch8568
         if detalhe+229(1) is not initial.
           add 1 to len.
         endif.
-* f - svt - lapm - 04.07.2017 - ch8568
 
         me->preencher_espaco(
           exporting
@@ -596,7 +594,7 @@ class zcl_fi_pgto_concessionarias implementation.
 
     case detalhe+13(1) .
 
-      when 'a' .
+      when 'A' .
 
         me->get_detail(
           exporting
@@ -639,7 +637,7 @@ class zcl_fi_pgto_concessionarias implementation.
 *       posições 231 a 240: preencher com brancos
         detalhe+230(10) = space .
 
-      when 'b' .
+      when 'B' .
 
         me->get_detail(
           exporting
@@ -654,7 +652,7 @@ class zcl_fi_pgto_concessionarias implementation.
         detalhe+95(2)     = line_bseg-zfbdt+6(2).
         detalhe+97(2)     = line_bseg-zfbdt+4(2).
         detalhe+99(4)     = line_bseg-zfbdt(4).
-        detalhe+103(3)    = 'rea'.
+        detalhe+103(3)    = 'REA'.
 
         clear detalhe+106(15).
 
@@ -682,24 +680,21 @@ class zcl_fi_pgto_concessionarias implementation.
   method change_info_detalhes_033 .
 
     data:
-      line_bseg type ty_bseg .
-* i - svt - acpm - 13.06.2017
-    data:
+      line_bseg    type ty_bseg,
       line_reguh   type ty_reguh,
       line_regup   type ty_regup,
       rbetr_c      type char13,
-      l_codigo(44) type n,
-      l_char(18),
-      l_valor(15)  type n.
-* v - svt - acpm - 13.06.2017
+      l_codigo     type n length 44,
+      l_char       type c length 18,
+      l_valor      type n length 15 .
 
-    clear: l_codigo, l_valor.
+    clear:
+      l_codigo, l_valor.
 
     case detalhe+13(1) .
 
-      when 'a' .
+      when 'A' .
 
-* i - svt - acpm - 13.06.2017 - gera registro o, como arquivo itaú
         me->get_detail(
            exporting
              detalhe = detalhe
@@ -707,24 +702,16 @@ class zcl_fi_pgto_concessionarias implementation.
              reguh   = line_reguh
              regup   = line_regup
              bseg    = line_bseg
-
-*        me->get_detail(
-*          exporting
-*            detalhe = detalhe
-*          importing
-**             reguh   =
-**             regup   =
-*            bseg    = line_bseg
-      ).
+        ).
 
         me->get_info_barcode(
-               exporting
-                 zbukr   = line_regup-zbukr
-                 belnr   = line_regup-belnr
-                 gjahr   = line_regup-gjahr
-                 buzei   = '001'
-               changing
-                 detalhe = detalhe
+          exporting
+            zbukr   = line_regup-zbukr
+            belnr   = line_regup-belnr
+            gjahr   = line_regup-gjahr
+            buzei   = '001'
+          changing
+            detalhe = detalhe
         ).
 
 * nome concessionária
