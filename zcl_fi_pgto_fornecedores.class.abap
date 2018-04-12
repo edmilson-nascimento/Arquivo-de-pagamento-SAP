@@ -193,9 +193,8 @@ class zcl_fi_pgto_concessionarias definition
       exporting
         !conta type char12
         !digito type char1 .
-        
-endclass.
 
+endclass.
 
 
 class zcl_fi_pgto_concessionarias implementation.
@@ -215,8 +214,6 @@ class zcl_fi_pgto_concessionarias implementation.
 
         when c_itau .
 
-*         cabecalho+9(7) = '2013030' .
-
 *         20 fornecedores
           cabecalho+9(2)  = '20' .
 *         13 pagamento de concessionárias
@@ -227,10 +224,7 @@ class zcl_fi_pgto_concessionarias implementation.
         when c_caixa .
 
           cabecalho+9(7) = '2013030' .
-
-*         1.07 014 016 9(003) versão do leiaute do lote
           cabecalho+13(3) = '041' .
-
 *         1.12    39  40  2   tipo de compromisso 01
           cabecalho+38(2) = '01' .
 *         1.13    41  44  4   código do compromisso   0002
@@ -248,7 +242,6 @@ class zcl_fi_pgto_concessionarias implementation.
 
           me->get_conta_corrente_104(
             importing
-*             conta  = cabecalho+53(12)
               conta  = cabecalho+58(12)
 *             digito =
           ).
@@ -256,9 +249,7 @@ class zcl_fi_pgto_concessionarias implementation.
 *         0.17    71  71  1   dv da conta (5)
           cabecalho+70(1) = '5' .
 *         0.18    72  72  1   dv da agência/conta (8)
-*         cabecalho+71(1) = '8' .
           cabecalho+71(1) = ' ' .
-
           unpack '0' to cabecalho+222(18).
 
           me->space(
@@ -296,7 +287,6 @@ class zcl_fi_pgto_concessionarias implementation.
       endcase.
 
     endif .
-
 
   endmethod.
 
@@ -321,7 +311,6 @@ class zcl_fi_pgto_concessionarias implementation.
           cabecalho+9(2)  = '22' .
 *         19 iptu/iss/outros tributos municipais
 *         35 fgts
-*         cabecalho+11(2) = '19' .
           cabecalho+11(2) = '35' .
 
           unpack '0' to cabecalho+222(18).
@@ -329,7 +318,6 @@ class zcl_fi_pgto_concessionarias implementation.
         when c_caixa .
 
           cabecalho+9(7) = '2013030' .
-
 *         1.07 014 016 9(003) versão do leiaute do lote
           cabecalho+13(3) = '041' .
 *         1.12    39  40  2   tipo de compromisso 01
@@ -356,7 +344,6 @@ class zcl_fi_pgto_concessionarias implementation.
 *         0.17    71  71  1   dv da conta (5)
           cabecalho+70(1) = '5' .
 *         0.18    72  72  1   dv da agência/conta (8)
-*         cabecalho+71(1) = '8' .
           cabecalho+71(1) = ' ' .
 
           unpack '0' to cabecalho+222(18).
@@ -399,7 +386,6 @@ class zcl_fi_pgto_concessionarias implementation.
 
   endmethod.
 
-
   method change_file.
 
 * para a solução atual, será feito apenas para f
@@ -416,38 +402,16 @@ class zcl_fi_pgto_concessionarias implementation.
       v_gjahr          type bseg-gjahr,
       filename         type string,
       t_arquivo        type tab_arquivo,
-
-* i - lapm - 16/08/2017 - ch8568
       lt_reguh         type tab_reguh.
-* f - lapm - 16/08/2017 - ch8568
 
-* i - 16/08/2017 - ch8568
-
-*    case reguh-rzawe .
-*
-*      when 'f' or 'g' .
-*
-*        clear: inicio, cabecalho, detalhe, rodape, fim, v_gjahr.
-*        refresh: t_cabecalho, t_detalhe, t_arquivo .
-*
-*        filename = i_filename.
-*
-*        call function 'gui_upload'
-*          exporting
-*            filename = filename
-*            filetype = 'asc'
-*          tables
-*            data_tab = t_arquivo.
-
-    clear: inicio, cabecalho, detalhe, rodape, fim, v_gjahr.
-    refresh: t_cabecalho, t_detalhe, t_arquivo .
+    clear: 
+      inicio, cabecalho, detalhe, rodape, fim, v_gjahr.
+    refresh:
+      t_cabecalho, t_detalhe, t_arquivo .
 
     filename    = i_filename.
     lt_reguh[]  = t_reguh[].
     t_arquivo[] = t_file[].
-
-
-* f - 16/08/2017 - ch8568
 
     check lines( t_arquivo ) gt 0.
 
@@ -468,28 +432,11 @@ class zcl_fi_pgto_concessionarias implementation.
         inicio = inicio
     ).
 
-* i - 16/08/2017 - ch8568
-
-**    case reguh-rzawe.
-*
-*      when 'f'.
-*        me->change_cabecalho_f(
-*          changing
-*            cabecalho = cabecalho
-*        ).
-*
-*      when 'g'.
-*        me->change_cabecalho_g(
-*          changing
-*            cabecalho = cabecalho
-*        ).
-*
-*    endcase.
-
     sort lt_reguh by rzawe.
 
-    read table lt_reguh with key rzawe = 'g' binary search
-                                             transporting no fields.
+    read table lt_reguh transporting no fields
+      with key rzawe = 'g' 
+        binary search .
 
     if sy-subrc eq 0.
       me->change_cabecalho_g(
@@ -502,7 +449,6 @@ class zcl_fi_pgto_concessionarias implementation.
           cabecalho = cabecalho
       ).
     endif.
-* f - 16/08/2017 - ch8568
 
     me->change_info_detalhes(
       changing
@@ -510,12 +456,12 @@ class zcl_fi_pgto_concessionarias implementation.
     ).
 
     me->change_info_rodape(
-     exporting detalhe = t_detalhe  " chamado 8183
+     exporting detalhe = t_detalhe
       changing rodape  = rodape
     ).
 
     me->change_info_fim(
-      exporting detalhe = t_detalhe  " chamado 8183
+      exporting detalhe = t_detalhe 
        changing fim     = fim
     ).
 
@@ -530,15 +476,12 @@ class zcl_fi_pgto_concessionarias implementation.
         t_arquivo = t_arquivo
     ).
 
-    call function 'gui_download'
+    call function 'GUI_DOWNLOAD'
       exporting
         filename = filename
-        filetype = 'asc'
+        filetype = 'ASC'
       tables
         data_tab = t_arquivo.
-
-*  when others.
-*endcase.
 
   endmethod.
 
@@ -565,12 +508,11 @@ class zcl_fi_pgto_concessionarias implementation.
       case detalhe(3) .
 
         when c_santander .
-* i - svt - acpm - 14.06.2017 - retira o registro b
-          if detalhe+13(1) = 'b'.
+
+          if detalhe+13(1) = 'B'.
             delete t_detalhe index tabix.
             continue.
           endif.
-* i - svt - acpm - 14.06.2017
 
           me->change_info_detalhes_033(
             changing
